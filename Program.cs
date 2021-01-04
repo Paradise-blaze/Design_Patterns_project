@@ -6,7 +6,9 @@ namespace Design_Patterns_project
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Macio");
+            Console.WriteLine("My first code ");
+            Console.WriteLine("in C# xDDDDDD");
         }
     }
 }
