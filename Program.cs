@@ -7,6 +7,7 @@ namespace Design_Patterns_project
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+            Console.WriteLine("First commit");
         }
     }
 }
