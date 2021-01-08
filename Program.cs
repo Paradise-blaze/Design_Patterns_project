@@ -7,8 +7,8 @@ namespace Design_Patterns_project
     {
         public static void Main(string[] args)
         {
-            IceDragon iceDragon = new IceDragon(20, "Gecko", 10, 20, 20, 50);
-            GoldDragon goldDragon = new GoldDragon(20, "Gecko", 10, 20, "magnetic", 40);
+            IceDragon iceDragon = new IceDragon(200, "Winterrer", 10, 20, 20, 50);
+            GoldDragon goldDragon = new GoldDragon(220, "Shiner", 10, 20, "magnetic", 40);
             TableInheritance mythicalInheritance = new TableInheritance();
             List<Object> creatures = new List<Object> () { iceDragon, goldDragon };
             mythicalInheritance.InheritSingle(creatures);

@@ -6,11 +6,12 @@ namespace Design_Patterns_project
 {
     class TableInheritance
     {
-        /* These function should be called with every last class of every branch in inheritance hierarchy:
-         - InheritSingle
-         - InheritClass
-         - InheritConcrete
-         */
+        /*
+        These function should be called with every last class of every branch in inheritance hierarchy:
+        - InheritSingle
+        - InheritClass
+        - InheritConcrete
+        */
 
         public Type GetMainType(Object member)
         {
