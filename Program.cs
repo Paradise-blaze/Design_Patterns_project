@@ -9,12 +9,21 @@ namespace Design_Patterns_project
         {
             IceDragon iceDragon = new IceDragon(200, "Winterrer", 10, 20, 20, 50);
             GoldDragon goldDragon = new GoldDragon(220, "Shiner", 10, 20, "magnetic", 40);
-            TableInheritance mythicalInheritance = new TableInheritance();
+            DataManager mythicalManager = new DataManager();
             List<Object> creatures = new List<Object> () { iceDragon, goldDragon };
-            mythicalInheritance.InheritSingle(creatures);
-            mythicalInheritance.InheritClass(creatures);
-            mythicalInheritance.InheritConcrete(creatures);
+            List<Object> wizards = new List<Object>() { new Wizard() };
+            mythicalManager.Inherit(creatures, 2);
+            mythicalManager.Inherit(wizards, 1);
         }
+    }
+
+    class Wizard
+    {
+        int health;
+        double magicPower;
+
+        List<Dragon> dragons = new List<Dragon>();
+        List<IceDragon> iceDragons = new List<IceDragon>();
     }
 
     class MythicalCreature

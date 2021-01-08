@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Reflection;
 
 namespace Design_Patterns_project
 {
@@ -15,7 +15,7 @@ namespace Design_Patterns_project
         Dictionary<Object, Object> _oneToManyRelationships = new Dictionary<Object, Object>();
         Dictionary<Object, Object> _manyToManyRelationships = new Dictionary<Object, Object>();
 
-        public void CreateTable()
+        public void CreateTable(string name, List<FieldInfo> fList)
         {
 
         }
@@ -38,6 +38,46 @@ namespace Design_Patterns_project
         public void Update()
         {
 
+        }
+
+        public void Inherit(List<Object> lastMembers, int mode)
+        {
+            try
+            {
+                TryInherit(lastMembers, mode);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+        public void TryInherit(List<Object> lastMembers, int mode)
+        {
+            switch (mode)
+            {
+                case 0: //SingleInheritance
+                    List<FieldInfo> fieldList = _tableInheritance.InheritSingle(lastMembers);
+                    Type mainType = _tableInheritance.GetMainType(lastMembers[0]);
+                    CreateTable(mainType.Name, fieldList);
+
+                    break;
+                case 1: //ClassInheritance
+                    Dictionary<Type, List<FieldInfo>> typeMap = _tableInheritance.InheritClass(lastMembers);
+
+                    foreach (var pair in typeMap)
+                        CreateTable(pair.Key.Name, pair.Value);
+
+                    break;
+                case 2: //ConcreteInheritance
+                    Dictionary<Type, List<FieldInfo>> singleMap = _tableInheritance.InheritConcrete(lastMembers);
+
+                    foreach (var pair in singleMap)
+                        CreateTable(pair.Key.Name, pair.Value);
+
+                    break;
+                default:
+                    throw new ArgumentException("Incorrect value", nameof(mode));
+            }
         }
     }
 }
