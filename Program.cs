@@ -7,23 +7,39 @@ namespace Design_Patterns_project
     {
         public static void Main(string[] args)
         {
-            IceDragon iceDragon = new IceDragon(200, "Winterrer", 10, 20, 20, 50);
-            GoldDragon goldDragon = new GoldDragon(220, "Shiner", 10, 20, "magnetic", 40);
+            IceDragon iceDragon = new IceDragon(200, "Winterrrer", 10, 20, 20, 50);
+            GoldDragon goldDragon = new GoldDragon(220, "Sauman", 10, 20, 40, 40);
             DataManager mythicalManager = new DataManager();
             List<Object> creatures = new List<Object> () { iceDragon, goldDragon };
-            List<Object> wizards = new List<Object>() { new Wizard() };
+            List<Object> wizards = new List<Object>() { new Wizard("Romas", 10, 2.41) };
             mythicalManager.Inherit(creatures, 2);
             mythicalManager.Inherit(wizards, 1);
+            Console.WriteLine("Utter success");
         }
     }
 
-    class Wizard
+    class Character
+    {
+        string name;
+
+        public Character(string name)
+        {
+            this.name = name;
+        }
+    }
+
+    class Wizard : Character
     {
         int health;
         double magicPower;
 
         List<Dragon> dragons = new List<Dragon>();
-        List<IceDragon> iceDragons = new List<IceDragon>();
+
+        public Wizard(string name, int health, double magicPower) : base(name)
+        {
+            this.health = health;
+            this.magicPower = magicPower;
+        }
     }
 
     class MythicalCreature
@@ -31,10 +47,10 @@ namespace Design_Patterns_project
         int health;
         string name;
 
-        public MythicalCreature(int h, string n)
+        public MythicalCreature(int health, string name)
         {
-            this.health = h;
-            this.name = n;
+            this.health = health;
+            this.name = name;
         }
     }
 
@@ -43,22 +59,23 @@ namespace Design_Patterns_project
         int fireCapacity;
         int endurance;
 
-        public Dragon(int h, string n, int fc, int e) : base(h, n)
+        public Dragon(int health, string name, int fireCapacity, int endurance) : base(health, name)
         {
-            this.fireCapacity = fc;
-            this.endurance = e;
+            this.fireCapacity = fireCapacity;
+            this.endurance = endurance;
         }
     }
 
     class GoldDragon : Dragon
     {
-        string specialSkill;
+        int mineralHunger;
         double preciousness;
 
-        public GoldDragon(int h, string n, int fc, int e, string ss, double p) : base(h, n, fc, e)
+        public GoldDragon(int health, string name, int fireCapacity, int endurance, int mineralHunger, double preciousness)
+            : base(health, name, fireCapacity, endurance)
         {
-            this.specialSkill = ss;
-            this.preciousness = p;
+            this.mineralHunger = mineralHunger;
+            this.preciousness = preciousness;
         }
     }
 
@@ -67,10 +84,11 @@ namespace Design_Patterns_project
         int iceCapacity;
         double timeFreeze;
 
-        public IceDragon(int h, string n, int fc, int e, int ic, double tf) : base(h, n, fc, e)
+        public IceDragon(int health, string name, int fireCapacity, int endurance, int iceCapacity, double timeFreeze)
+            : base(health, name, fireCapacity, endurance)
         {
-            this.iceCapacity = ic;
-            this.timeFreeze = tf;
+            this.iceCapacity = iceCapacity;
+            this.timeFreeze = timeFreeze;
         }
     }
 }
