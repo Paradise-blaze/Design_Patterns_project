@@ -1,4 +1,5 @@
 ﻿using System;
+using Design_Patterns_project.Connection;
 using System.Collections.Generic;
 
 namespace Design_Patterns_project
@@ -7,6 +8,20 @@ namespace Design_Patterns_project
     {
         public static void Main(string[] args)
         {
+
+
+            //remote -> "den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_"
+            //local -> "DESKTOP-HVUO0CP", "TestDB"
+
+            MsSqlConnectionConfig remoteConfig = new MsSqlConnectionConfig("den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_");
+            MsSqlConnectionConfig localConfig = new MsSqlConnectionConfig("DESKTOP-HVUO0CP", "TestDB");
+            MsSqlConnection connection = new MsSqlConnection(localConfig);
+            connection.ConnectAndOpen();
+            string query = "SELECT * FROM dbo.Players;";
+            string output = connection.ExecuteSelectCommand(query);
+            Console.WriteLine(output);
+
+
             IceDragon iceDragon = new IceDragon(200, "Winterrrer", 10, 20, 20, 50);
             GoldDragon goldDragon = new GoldDragon(220, "Sauman", 10, 20, 40, 40);
             DataManager mythicalManager = new DataManager();
@@ -89,6 +104,7 @@ namespace Design_Patterns_project
         {
             this.iceCapacity = iceCapacity;
             this.timeFreeze = timeFreeze;
+
         }
     }
 }
