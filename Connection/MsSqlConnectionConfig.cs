@@ -29,8 +29,5 @@ namespace Design_Patterns_project.Connection
             return connectionString;
         }
 
-        
-        
-
     }
 }

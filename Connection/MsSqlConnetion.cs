@@ -48,7 +48,9 @@ namespace Design_Patterns_project.Connection
             
         }
 
-        public string ExecuteSelectCommand(string sqlQuery){
+
+        // SELECT
+        public string ExecuteSelectQuery(string sqlQuery){
 
             SqlCommand command = new SqlCommand(sqlQuery,this.connection);
             SqlDataReader dataReader = command.ExecuteReader();
@@ -60,7 +62,6 @@ namespace Design_Patterns_project.Connection
             // add header
             for(int i=0; i<colsAmount; i++){
                 string colName = dataReader.GetName(i);
-
                 output += colName;
                 for(int j=0; j<(colWidht - colName.Length); j++){
                     output += " ";
@@ -68,6 +69,8 @@ namespace Design_Patterns_project.Connection
                 output += "|";  
             }
 
+            output += "\n";
+            for(int j=0; j<(colsAmount*colWidht)+colsAmount; j++){output += "-";}
             output += "\n";
 
             // add records
@@ -78,7 +81,7 @@ namespace Design_Patterns_project.Connection
             return output;
         }
 
-        private static string ReadSingleRow(IDataRecord record, int colsAmount, int colWidht)
+        private string ReadSingleRow(IDataRecord record, int colsAmount, int colWidht)
         {   
             string recordString = "";
     
@@ -92,6 +95,15 @@ namespace Design_Patterns_project.Connection
             }
             return recordString+"\n";
         }
-    } 
+
+
+        // INSERT,UPDATE,DROP,DELETE, etc.
+        public void ExecuteQuery(string sqlQuery){
+            SqlCommand command = new SqlCommand(sqlQuery,this.connection);
+            int num = command.ExecuteNonQuery();
+            Console.WriteLine("Num of edited rows: "+num);
+        }
+
+    }
 
 }
