@@ -5,27 +5,27 @@ namespace Design_Patterns_project.Connection
 {
     class MsSqlConnectionConfig
     {
-        public string serverName {get;}
-        private string databaseName;
-        private string user;
-        private string password;
+        public string _serverName {get;}
+        private string _databaseName;
+        private string _user;
+        private string _password;
 
 
-        public MsSqlConnectionConfig(string serverName, string databaseName){
-            this.serverName = serverName;
-            this.databaseName = databaseName;
+        public MsSqlConnectionConfig(string _serverName, string _databaseName){
+            this._serverName = _serverName;
+            this._databaseName = _databaseName;
         }
 
-        public MsSqlConnectionConfig(string serverName, string databaseName, string user, string password ){
-            this.serverName = serverName;
-            this.databaseName = databaseName;
-            this.user = user;
-            this.password = password;
+        public MsSqlConnectionConfig(string _serverName, string _databaseName, string _user, string _password ){
+            this._serverName = _serverName;
+            this._databaseName = _databaseName;
+            this._user = _user;
+            this._password = _password;
         }
 
         public string CreateConnectionString(){
-            string connectionString = this.user == null ? @"Data Source="+this.serverName+";Initial Catalog="+this.databaseName+"; Integrated Security=True;" :
-            "Server=" + this.serverName + ";Database=" + this.databaseName + ";User Id=" +this.user + ";Password=" + this.password + ";MultipleActiveResultSets=true;";
+            string connectionString = this._user == null ? @"Data Source="+this._serverName+";Initial Catalog="+this._databaseName+"; Integrated Security=True;" :
+            "Server=" + this._serverName + ";Database=" + this._databaseName + ";User Id=" +this._user + ";_Password=" + this._password + ";MultipleActiveResultSets=true;";
             return connectionString;
         }
 

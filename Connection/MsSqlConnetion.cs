@@ -7,44 +7,44 @@ namespace Design_Patterns_project.Connection
 {
     class MsSqlConnection : IDisposable
     {
-        private static readonly MsSqlConnection instance = new MsSqlConnection();
-        private SqlConnection connection;
-        private MsSqlConnectionConfig config;
+        private static readonly MsSqlConnection _instance = new MsSqlConnection();
+        private SqlConnection _connection;
+        private MsSqlConnectionConfig _config;
 
 
         private MsSqlConnection()
         {
-            this.connection = new SqlConnection();
+            this._connection = new SqlConnection();
         }
 
         public MsSqlConnection(MsSqlConnectionConfig config)
         {
-            this.connection = new SqlConnection();
-            this.config = config;
+            this._connection = new SqlConnection();
+            this._config = config;
         }
 
-        public static MsSqlConnection getInstance()
+        public static MsSqlConnection GetsInstance()
         {
-            return instance;
+            return _instance;
         }
 
         public void SetConfiguration(MsSqlConnectionConfig config)
         {
-            this.config = config;
+            this._config = config;
         }
 
 
         public void ConnectAndOpen()
         {
-            this.connection.ConnectionString = config.CreateConnectionString();
-            this.connection.Open();
+            this._connection.ConnectionString = _config.CreateConnectionString();
+            this._connection.Open();
         }
         
 
         public void Dispose()
         {
-            this.connection.Close();
-            this.connection.Dispose();
+            this._connection.Close();
+            this._connection.Dispose();
             
         }
 
@@ -52,7 +52,7 @@ namespace Design_Patterns_project.Connection
         // SELECT
         public string ExecuteSelectQuery(string sqlQuery){
 
-            SqlCommand command = new SqlCommand(sqlQuery,this.connection);
+            SqlCommand command = new SqlCommand(sqlQuery,this._connection);
             SqlDataReader dataReader = command.ExecuteReader();
 
             string output = "";
@@ -99,7 +99,7 @@ namespace Design_Patterns_project.Connection
 
         // INSERT,UPDATE,DROP,DELETE, etc.
         public void ExecuteQuery(string sqlQuery){
-            SqlCommand command = new SqlCommand(sqlQuery,this.connection);
+            SqlCommand command = new SqlCommand(sqlQuery,this._connection);
             int num = command.ExecuteNonQuery();
             Console.WriteLine("Num of edited rows: "+num);
         }
