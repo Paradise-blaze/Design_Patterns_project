@@ -11,9 +11,6 @@ namespace Design_Patterns_project
         //QueryBuilder _queryBuilder = new QueryBuilder();
         //WorkUnit _workUnit = new WorkUnit();
         TableInheritance _tableInheritance = new TableInheritance();
-        Dictionary<Object, Object> _oneToOneRelationships = new Dictionary<Object, Object>();
-        Dictionary<Object, Object> _oneToManyRelationships = new Dictionary<Object, Object>();
-        Dictionary<Object, Object> _manyToManyRelationships = new Dictionary<Object, Object>();
 
         public void CreateTable(string name, List<FieldInfo> fList)
         {
