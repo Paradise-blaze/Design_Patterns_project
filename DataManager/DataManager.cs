@@ -17,7 +17,12 @@ namespace Design_Patterns_project
 
         public void CreateTable(string name, List<FieldInfo> fList)
         {
-
+            //string query = _queryBuilder.GetCreateQuery(name, fList);
+            //_databaseConnection.ExecuteCreateCommand(query);
+            /*FieldInfo[] fieldArray = name.GetType().GetFields();
+            foreach (var attr in fieldArray[0].GetCustomAttributes())
+                Console.WriteLine(attr);
+            Console.WriteLine();*/
         }
 
         public void Select()
@@ -51,6 +56,7 @@ namespace Design_Patterns_project
                 Console.WriteLine(e.Message);
             }
         }
+
         public void TryInherit(List<Object> lastMembers, int mode)
         {
             switch (mode)
@@ -59,7 +65,7 @@ namespace Design_Patterns_project
                     List<FieldInfo> fieldList = _tableInheritance.InheritSingle(lastMembers);
                     Type mainType = _tableInheritance.GetMainType(lastMembers[0]);
                     CreateTable(mainType.Name, fieldList);
-
+                    
                     break;
                 case 1: //ClassInheritance
                     Dictionary<Type, List<FieldInfo>> typeMap = _tableInheritance.InheritClass(lastMembers);

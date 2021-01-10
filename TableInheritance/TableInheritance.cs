@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Design_Patterns_project
 {
-    class TableInheritance //future - deal with attributes and relationships
+    class TableInheritance
     {
         /*
         These function should be called with every last class of every branch in inheritance hierarchy:
@@ -73,24 +73,19 @@ namespace Design_Patterns_project
 
         public Dictionary<Type, List<FieldInfo>> InheritConcrete(List<Object> lastMembers)
         {
-            List<Dictionary<Type, List<FieldInfo>>> typeMapList = new List<Dictionary<Type, List<FieldInfo>>>();
+            Dictionary<Type, List<FieldInfo>> typeMap = new Dictionary<Type, List<FieldInfo>>();
 
             foreach (var member in lastMembers)
             {
-                Dictionary<Type, List<FieldInfo>> typeMap = new Dictionary<Type, List<FieldInfo>>();
-                AddConcreteInheritanceMember(member.GetType(), typeMap);
-                typeMapList.Add(typeMap);
+                Dictionary<Type, List<FieldInfo>> singleMap = new Dictionary<Type, List<FieldInfo>>();
+                AddConcreteInheritanceMember(member.GetType(), singleMap);
+
+                foreach (var pair in singleMap)
+                    if (!typeMap.ContainsKey(pair.Key))
+                        typeMap.Add(pair.Key, pair.Value);
             }
 
-
-            Dictionary<Type, List<FieldInfo>> singleMap = new Dictionary<Type, List<FieldInfo>>();
-
-            foreach (var map in typeMapList)
-                foreach (var pair in map)
-                    if (!singleMap.ContainsKey(pair.Key))
-                        singleMap.Add(pair.Key, pair.Value);
-
-            return singleMap;
+            return typeMap;
         }
 
         public void AddConcreteInheritanceMember(Type memberType, Dictionary<Type, List<FieldInfo>> tMap)
