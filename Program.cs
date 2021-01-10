@@ -43,7 +43,7 @@ namespace Design_Patterns_project
             DataManager mythicalManager = new DataManager();
             List<Object> creatures = new List<Object> () { iceDragon, goldDragon };
             List<Object> wizards = new List<Object>() { new Wizard("Romas", 10, 2.41) };
-            mythicalManager.Inherit(creatures, 2);
+            mythicalManager.Inherit(creatures, 0);
             mythicalManager.Inherit(wizards, 1);
             Console.WriteLine("Utter success");
         }

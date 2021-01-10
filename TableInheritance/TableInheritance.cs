@@ -38,15 +38,17 @@ namespace Design_Patterns_project
         {
             FieldInfo[] currentFields = memberType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-            foreach (var field in currentFields)
-                if (!fList.Contains(field))
-                    fList.Add(field);
-
             if (!tList.Contains(memberType))
+            {
+                foreach (var field in currentFields)
+                    if (!fList.Contains(field))
+                        fList.Add(field);
+
                 tList.Add(memberType);
 
-            if (memberType.BaseType != typeof(Object)) // Object as a parent
-                AddSingleInheritanceMember(memberType.BaseType, fList, tList);
+                if (memberType.BaseType != typeof(Object)) // Object as a parent
+                    AddSingleInheritanceMember(memberType.BaseType, fList, tList);
+            }
         }
 
         public Dictionary<Type, List<FieldInfo>> InheritClass(List<Object> lastMembers)
