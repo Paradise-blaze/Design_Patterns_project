@@ -5,11 +5,11 @@ namespace Design_Patterns_project.Attributes
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     sealed class ColumnAttribute : Attribute
     {
-        public string m_columnName {private set; get;}
+        public string _columnName {private set; get;}
 
         public ColumnAttribute(string columnName = null)
         {
-            m_columnName = columnName;
+            _columnName = columnName;
         }
     }
 }
