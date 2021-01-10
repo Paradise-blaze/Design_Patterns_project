@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Design_Patterns_project.SqlCondition
+namespace Design_Patterns_project.SqlConditions
 {
     public class SqlCondition
     {
 
-        private string sqlOperator;
+        private string _sqlOperator;
         protected string field;
         protected object value;
-        public SqlCondition(string sqlOperator, string field, object value)
+        public SqlCondition(string _sqlOperator, string field, object value)
         {
-            this.sqlOperator = sqlOperator;
+            this._sqlOperator = _sqlOperator;
             this.field = field;
             this.value = value;
         }
@@ -22,9 +22,9 @@ namespace Design_Patterns_project.SqlCondition
         {
             if (value.GetType() == typeof(string))
             {
-                return field + sqlOperator + '"' + value + '"';
+                return field + _sqlOperator + '"' + value + '"';
             }
-            return field + sqlOperator + value.ToString();
+            return field + _sqlOperator + value.ToString();
         }
 
         public static SqlCondition greaterThan(string fieldName, object value)
