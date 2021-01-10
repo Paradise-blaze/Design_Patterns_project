@@ -1,16 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Design_Patterns_project.Relationships;
+using orm.Query;
+using Design_Patterns_project.Connection;
 
 namespace Design_Patterns_project
 {
     class DataManager
     {
         //DataMapper _dataMapper = new DataMapper();
-        //DatabaseConnection _databaseConnection = new DatabaseConnection();
-        //QueryBuilder _queryBuilder = new QueryBuilder();
+        MsSqlConnection _msSqlConnection;
+        QueryBuilder _queryBuilder = new QueryBuilder();
         //WorkUnit _workUnit = new WorkUnit();
         TableInheritance _tableInheritance = new TableInheritance();
+        List<Relationship> _oneToOneRelationships = new List<Relationship>();
+        List<Relationship> _oneToManyRelationships = new List<Relationship>();
+        List<Relationship> _manyToManyRelationships = new List<Relationship>();
+
+        DataManager(string serverName, string databaseName, string user, string password)
+        {
+            MsSqlConnectionConfig config = new MsSqlConnectionConfig(serverName, databaseName, user, password);
+            this._msSqlConnection = new MsSqlConnection(config);
+        }
+        DataManager(string serverName, string databaseName)
+        {
+            MsSqlConnectionConfig config = new MsSqlConnectionConfig(serverName, databaseName);
+            this._msSqlConnection = new MsSqlConnection(config);
+        }
+
+        public void OpenConnection()
+        {
+            this._msSqlConnection.ConnectAndOpen();
+        }
+
+        public void CloseConnection()
+        {
+            this._msSqlConnection.Dispose();
+        }
 
         public void CreateTable(string name, List<FieldInfo> fList)
         {

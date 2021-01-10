@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Design_Patterns_project.SqlCondition;
 
 namespace orm.Query

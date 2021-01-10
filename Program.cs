@@ -20,16 +20,17 @@ namespace Design_Patterns_project
             string query = "SELECT * FROM dbo.Players;";
             string output = connection.ExecuteSelectCommand(query);
             Console.WriteLine(output);
+            connection.Dispose();
 
 
-            IceDragon iceDragon = new IceDragon(200, "Winterrrer", 10, 20, 20, 50);
+            /*IceDragon iceDragon = new IceDragon(200, "Winterrrer", 10, 20, 20, 50);
             GoldDragon goldDragon = new GoldDragon(220, "Sauman", 10, 20, 40, 40);
             DataManager mythicalManager = new DataManager();
             List<Object> creatures = new List<Object> () { iceDragon, goldDragon };
             List<Object> wizards = new List<Object>() { new Wizard("Romas", 10, 2.41) };
             mythicalManager.Inherit(creatures, 0);
             mythicalManager.Inherit(wizards, 1);
-            Console.WriteLine("Utter success");
+            Console.WriteLine("Utter success");*/
         }
     }
 
