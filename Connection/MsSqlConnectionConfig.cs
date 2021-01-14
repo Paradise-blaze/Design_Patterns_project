@@ -25,7 +25,7 @@ namespace Design_Patterns_project.Connection
 
         public string CreateConnectionString(){
             string connectionString = this._user == null ? @"Data Source="+this._serverName+";Initial Catalog="+this._databaseName+"; Integrated Security=True;" :
-            "Server=" + this._serverName + ";Database=" + this._databaseName + ";User Id=" +this._user + ";_Password=" + this._password + ";MultipleActiveResultSets=true;";
+            "Server=" + this._serverName + ";Database=" + this._databaseName + ";User Id=" +this._user + ";Password=" + this._password + ";MultipleActiveResultSets=true;";
             return connectionString;
         }
 
