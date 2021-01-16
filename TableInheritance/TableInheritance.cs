@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Design_Patterns_project
 {
@@ -20,109 +18,114 @@ namespace Design_Patterns_project
             Type currentType = instance.GetType();
 
             while (currentType.BaseType != typeof(Object))
+            {
                 currentType = currentType.BaseType;
+            }
 
             return currentType;
         }
 
-        public List<MemberInfo> InheritSingle(List<Object> inheritanceHierarchyLeaves)
+        public List<PropertyInfo> InheritSingle(List<Object> inheritanceHierarchyLeaves)
         {
-            List<MemberInfo> memberList = new List<MemberInfo>();
-            List<Type> typeList = new List<Type>();
+            List<PropertyInfo> allPropertiesInHierarchy = new List<PropertyInfo>();
+            List<Type> visitedTypes = new List<Type>();
 
             foreach (Object leaf in inheritanceHierarchyLeaves)
-                AddSingleInheritanceMember(leaf.GetType(), memberList, typeList);
+            {
+                AddSingleInheritanceMember(leaf.GetType(), allPropertiesInHierarchy, visitedTypes);
+            }
 
-            return memberList;
+            return allPropertiesInHierarchy;
         }
 
-        public void AddSingleInheritanceMember(Type leafType, List<MemberInfo> mList, List<Type> tList)
+        public void AddSingleInheritanceMember(Type leafType, List<PropertyInfo> allProperties, List<Type> visited)
         {
-            BindingFlags bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            MemberInfo[] currentMembers = leafType.GetFields(bindingFlag)
-                                            .Cast<MemberInfo>()
-                                            .Concat(leafType.GetProperties(bindingFlag))
-                                            .Where(val => !(val.Name[0] == '<'))
-                                            .ToArray();
+            PropertyInfo[] currentProperties = DataMapper.GetTypeProperties(leafType);
 
-            if (!tList.Contains(leafType))
+            if (!visited.Contains(leafType))
             {
-                foreach (var member in currentMembers)
-                    if (!mList.Contains(member))
-                        mList.Add(member);
+                foreach (var property in currentProperties)
+                {
+                    if (!allProperties.Contains(property))
+                    {
+                        allProperties.Add(property);
+                    }
+                }
 
-                tList.Add(leafType);
+                visited.Add(leafType);
 
-                if (leafType.BaseType != typeof(Object)) // Object as a parent
-                    AddSingleInheritanceMember(leafType.BaseType, mList, tList);
+                if (leafType.BaseType != typeof(Object)) // Object as a parent 
+                {
+                    AddSingleInheritanceMember(leafType.BaseType, allProperties, visited);
+                }
             }
         }
 
-        public Dictionary<Type, List<MemberInfo>> InheritClass(List<Object> inheritanceHierarchyLeaves)
+        public Dictionary<Type, List<PropertyInfo>> InheritClass(List<Object> inheritanceHierarchyLeaves)
         {
-            Dictionary<Type, List<MemberInfo>> typeMap = new Dictionary<Type, List<MemberInfo>>();
+            Dictionary<Type, List<PropertyInfo>> typesAndTheirProperties = new Dictionary<Type, List<PropertyInfo>>();
 
             foreach (var leaf in inheritanceHierarchyLeaves)
-                AddClassInheritanceMember(leaf.GetType(), typeMap);
+            {
+                AddClassInheritanceMember(leaf.GetType(), typesAndTheirProperties);
+            }
 
-            return typeMap;
+            return typesAndTheirProperties;
         }
 
-        public void AddClassInheritanceMember(Type leafType, Dictionary<Type, List<MemberInfo>> tMap)
+        public void AddClassInheritanceMember(Type leafType, Dictionary<Type, List<PropertyInfo>> typesAndProperties)
         {
-            if (!tMap.ContainsKey(leafType))
+            if (!typesAndProperties.ContainsKey(leafType))
             {
-                BindingFlags bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-                MemberInfo[] currentMembers = leafType.GetFields(bindingFlag)
-                                                .Cast<MemberInfo>()
-                                                .Concat(leafType.GetProperties(bindingFlag))
-                                                .Where(val => !(val.Name[0] == '<'))
-                                                .ToArray();
-                List<MemberInfo> memberList = new List<MemberInfo>(currentMembers);
+                List<PropertyInfo> propertiesList = new List<PropertyInfo>(DataMapper.GetTypeProperties(leafType));
 
-                tMap.Add(leafType, memberList);
+                typesAndProperties.Add(leafType, propertiesList);
                 
                 if (leafType.BaseType != typeof(Object))
-                    AddClassInheritanceMember(leafType.BaseType, tMap);
+                {
+                    AddClassInheritanceMember(leafType.BaseType, typesAndProperties);
+                }
             }
         }
 
-        public Dictionary<Type, List<MemberInfo>> InheritConcrete(List<Object> inheritanceHierarchyLeaves)
+        public Dictionary<Type, List<PropertyInfo>> InheritConcrete(List<Object> inheritanceHierarchyLeaves)
         {
-            Dictionary<Type, List<MemberInfo>> typeMap = new Dictionary<Type, List<MemberInfo>>();
+            Dictionary<Type, List<PropertyInfo>> typesAndTheirProperties = new Dictionary<Type, List<PropertyInfo>>();
 
             foreach (var leaf in inheritanceHierarchyLeaves)
             {
-                Dictionary<Type, List<MemberInfo>> singleMap = new Dictionary<Type, List<MemberInfo>>();
-                AddConcreteInheritanceMember(leaf.GetType(), singleMap);
+                Dictionary<Type, List<PropertyInfo>> oneBranchTypesAndProperties = new Dictionary<Type, List<PropertyInfo>>();
+                AddConcreteInheritanceMember(leaf.GetType(), oneBranchTypesAndProperties);
 
-                foreach (var pair in singleMap)
-                    if (!typeMap.ContainsKey(pair.Key))
-                        typeMap.Add(pair.Key, pair.Value);
+                foreach (var pair in oneBranchTypesAndProperties)
+                    if (!typesAndTheirProperties.ContainsKey(pair.Key))
+                        typesAndTheirProperties.Add(pair.Key, pair.Value);
             }
 
-            return typeMap;
+            return typesAndTheirProperties;
         }
 
-        public void AddConcreteInheritanceMember(Type leafType, Dictionary<Type, List<MemberInfo>> tMap)
+        public void AddConcreteInheritanceMember(Type leafType, Dictionary<Type, List<PropertyInfo>> oneBranchTypesAndProperties)
         {
-            BindingFlags bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            MemberInfo[] currentMembers = leafType.GetFields(bindingFlag)
-                                            .Cast<MemberInfo>()
-                                            .Concat(leafType.GetProperties(bindingFlag))
-                                            .Where(val => !(val.Name[0] == '<'))
-                                            .ToArray();
-            List<MemberInfo> memberList = new List<MemberInfo>(currentMembers);
+            List<PropertyInfo> propertiesList = new List<PropertyInfo>(DataMapper.GetTypeProperties(leafType));
 
-            foreach (var pair in tMap)
-                foreach (var member in memberList)
+            foreach (var pair in oneBranchTypesAndProperties)
+            {
+                foreach (var member in propertiesList)
+                {
                     pair.Value.Add(member);
+                }
+            }
             
-            if (!tMap.ContainsKey(leafType))
-                tMap.Add(leafType, memberList);
+            if (!oneBranchTypesAndProperties.ContainsKey(leafType))
+            {
+                oneBranchTypesAndProperties.Add(leafType, propertiesList);
+            }
 
             if (leafType.BaseType != typeof(Object))
-                AddConcreteInheritanceMember(leafType.BaseType, tMap);
+            {
+                AddConcreteInheritanceMember(leafType.BaseType, oneBranchTypesAndProperties);
+            }
         }
     }
 }

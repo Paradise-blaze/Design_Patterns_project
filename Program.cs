@@ -29,14 +29,14 @@ namespace Design_Patterns_project
             connection.ExecuteQuery(testInsertQuery);
             output = connection.ExecuteSelectQuery(testSelectQuery);
             Console.WriteLine(output);
-            connection.Dispose();*/
+            connection.Dispose();
 
             connection.ExecuteQuery(testDeleteQuery);
             output = connection.ExecuteSelectQuery(testSelectQuery);
             Console.WriteLine(output);
 
 
-            connection.Dispose();
+            connection.Dispose();*/
 
 
             IceDragon iceDragon = new IceDragon(200, "Winterrrer", 10, 20, 20, 50);

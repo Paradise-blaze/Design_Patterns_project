@@ -2,15 +2,20 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Collections;
 using Design_Patterns_project.Attributes;
 
-namespace orm.Mapper
+namespace Design_Patterns_project
 {
-
-    class PropertiesMapper
+    class DataMapper
     {
+        public static PropertyInfo[] GetTypeProperties(Type type)
+        {
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            PropertyInfo[] typeProperties = type.GetProperties(bindingFlags);
+            return typeProperties;
+        }
+
         public string GetTableName(Object t)
         {
             TableAttribute attr = (TableAttribute)Attribute.GetCustomAttribute(t.GetType(), typeof(TableAttribute));
@@ -26,133 +31,125 @@ namespace orm.Mapper
             }
         }
 
-        public List<string> GetColumnName(Object t)
+        public List<string> GetColumnNamesFromObject(Object instance)
         {
-            List<string> list = new List<string> { };
-            Type type = t.GetType();
-            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            PropertyInfo[] props = type.GetProperties(bindingFlags);
+            List<string> columnNames = new List<string>();
+            Type instanceType = instance.GetType();
+            PropertyInfo[] instanceProperties = GetTypeProperties(instanceType);
 
-            foreach (PropertyInfo prp in props)
+            foreach (PropertyInfo property in instanceProperties)
             {
-                MethodInfo strGetter = prp.GetGetMethod(nonPublic: true);
-                object[] att = prp.GetCustomAttributes(typeof(ColumnAttribute), false);
-                var val = strGetter.Invoke(t, null);
+                Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
 
-                if (att.Length == 0)
+                if (columnAttributes.Length == 0)
                 {
-                    string columnName = ConvertObjectNameToString(prp.Name);
-                    list.Add(columnName); ;
+                    string columnName = ConvertObjectNameToString(property.Name);
+                    columnNames.Add(columnName);
                 }
                 else
                 {
-                    foreach (ColumnAttribute atr in att)
-                    {
-                        list.Add(atr._columnName);
-                    }
+                    ColumnAttribute columnAttribute = (ColumnAttribute)columnAttributes[0];
+                    columnNames.Add(columnAttribute._columnName);
                 }
             }
 
-            return list;
+            return columnNames;
         }
 
-        public List<Tuple<string, object>> GetColumnAndValue(Object obj)
+        public List<Tuple<string, Object>> GetColumnsAndValues(Object instance)
         {
-            List<Tuple<string, object>> list = new List<Tuple<string, object>> { };
-            Type type = obj.GetType();
-            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            PropertyInfo[] props = type.GetProperties(bindingFlags);
+            List<Tuple<string, Object>> list = new List<Tuple<string, Object>> { };
+            Type instanceType = instance.GetType();
+            PropertyInfo[] properties = GetTypeProperties(instanceType);
             
-            foreach (PropertyInfo prp in props)
+            foreach (PropertyInfo property in properties)
             {
-                MethodInfo strGetter = prp.GetGetMethod(nonPublic: true);
-                var val = strGetter.Invoke(obj, null);
-                object[] att = prp.GetCustomAttributes(typeof(ColumnAttribute), false);
-
-                if (att.Length == 0)
-                    continue;
-
+                MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
+                var value = strGetter.Invoke(instance, null);
                 string columnName;
-                ColumnAttribute att1 = (ColumnAttribute)att[0];
+                Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
 
-                if (att1._columnName == null)
+                if (columnAttributes.Length == 0)
                 {
-                    columnName = ConvertObjectNameToString(prp.Name);
+                    continue;
+                }
+
+                ColumnAttribute columnAttribute = (ColumnAttribute)columnAttributes[0];
+
+                if (columnAttribute._columnName == null)
+                {
+                    columnName = ConvertObjectNameToString(property.Name);
                 }
                 else
                 {
-                    columnName = att1._columnName;
+                    columnName = columnAttribute._columnName;
                 }
 
-                object[] oneToOneAtt = prp.GetCustomAttributes(typeof(OneToOneAttribute), false);
+                Object[] oneToOneAttributes = property.GetCustomAttributes(typeof(OneToOneAttribute), false);
 
-                if (oneToOneAtt.Length != 0)
+                //foreign key mapping
+                if (oneToOneAttributes.Length != 0)
                 {
-                    if (val != null)
+                    if (value != null)
                     {
-                        var forgeinKey = findPrimaryKey(val);
-                        val = forgeinKey;
+                        var foreignKey = FindPrimaryKey(value);
+                        value = foreignKey;
                     }
                     else
                     {
-                        val = "null";
-
+                        value = "null";
                     }
                 }
 
-                list.Add(new Tuple<string, object>(columnName, val));
+                list.Add(new Tuple<string, Object>(columnName, value));
             }
 
             return list;
         }
 
-        public object findPrimaryKey(object obj)
+        public Object FindPrimaryKey(Object instance)
         {
-            object primaryKey;
-            Type type = obj.GetType();
-            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            PropertyInfo[] props = type.GetProperties(bindingFlags);
+            Object primaryKey;
+            Type instanceType = instance.GetType();
+            PropertyInfo[] properties = GetTypeProperties(instanceType);
             
-            foreach (PropertyInfo prp in props)
+            foreach (PropertyInfo property in properties)
             {
-                MethodInfo strGetter = prp.GetGetMethod(nonPublic: true);
+                Object[] att = property.GetCustomAttributes(typeof(PKeyAttribute), false);
 
-                primaryKey = strGetter.Invoke(obj, null);
-                object[] att = prp.GetCustomAttributes(typeof(PKeyAttribute), false);
                 if (att.Length != 0)
                 {
+                    MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
+                    primaryKey = strGetter.Invoke(instance, null);
                     return primaryKey;
                 }
             }
 
             return null;
         }
-        public string FindPrimaryKeyFieldName(object obj)
-        {
-            object primaryKey;
-            Type type = obj.GetType();
-            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            PropertyInfo[] props = type.GetProperties(bindingFlags);
-            
-            foreach (PropertyInfo prp in props)
-            {
-                MethodInfo strGetter = prp.GetGetMethod(nonPublic: true);
-                primaryKey = strGetter.Invoke(obj, null);
-                object[] att = prp.GetCustomAttributes(typeof(PKeyAttribute), false);
 
-                if (att.Length != 0)
+        public string FindPrimaryKeyFieldName(Object instance)
+        {
+            Type instanceType = instance.GetType();
+            PropertyInfo[] properties = GetTypeProperties(instanceType);
+            
+            foreach (PropertyInfo property in properties)
+            {
+                Object[] pKeyAttributes = property.GetCustomAttributes(typeof(PKeyAttribute), false);
+
+                if (pKeyAttributes.Length != 0)
                 {
                     string columnName;
-                    object[] attColumn = prp.GetCustomAttributes(typeof(ColumnAttribute), false);
-                    ColumnAttribute att1 = (ColumnAttribute)attColumn[0];
+                    Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
+                    ColumnAttribute columnAttribute = (ColumnAttribute)columnAttributes[0];
 
-                    if (att1._columnName == null)
+                    if (columnAttribute._columnName == null)
                     {
-                        columnName = ConvertObjectNameToString(prp.Name);
+                        columnName = ConvertObjectNameToString(property.Name);
                     }
                     else
                     {
-                        columnName = att1._columnName;
+                        columnName = columnAttribute._columnName;
                     }
 
                     return columnName;
@@ -161,138 +158,122 @@ namespace orm.Mapper
 
             return null;
         }
-        public string ConvertObjectNameToString(Object t)
+
+        public string ConvertObjectNameToString(Object instance)
         {
-            string nameWithNamespaces = t.ToString();
-            int appearanceOfLastFullStop = -1;
-
-            for (int i = nameWithNamespaces.Length - 1; i > 0; i--)
-            {
-                if (nameWithNamespaces[i] == '.')
-                {
-                    appearanceOfLastFullStop = i;
-                }
-            }
-
-            string nameWithoutNamespaces = nameWithNamespaces.Substring(appearanceOfLastFullStop + 1);
-
-            return nameWithoutNamespaces;
+            return instance.GetType().Name;
         }
 
-
-        public Dictionary<string, object> CreateDictionaryFromTable(SqlDataReader reader)
+        public Dictionary<string, Object> CreateDictionaryFromTable(SqlDataReader reader)
         {
-            Dictionary<string, object> columnNameAndItsValue = new Dictionary<string, object>();
+            Dictionary<string, Object> columnNamesAndTheirValues = new Dictionary<string, Object>();
 
             while (reader.Read())
             {
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    columnNameAndItsValue.Add(reader.GetName(i), reader[i]);
+                    columnNamesAndTheirValues.Add(reader.GetName(i), reader[i]);
                 }
             }
 
-            return columnNameAndItsValue;
+            return columnNamesAndTheirValues;
         }
 
-        public object GetValueOfForeignKey(PropertyInfo prp, SqlDataReader reader)
+        public Object GetValueOfForeignKey(PropertyInfo property, SqlDataReader reader)
         {
-            Dictionary<string, object> columnNameAndItsValue = CreateDictionaryFromTable(reader);
+            Dictionary<string, Object> columnNamesAndTheirValue = CreateDictionaryFromTable(reader);
             reader.Close();
 
-            if (columnNameAndItsValue.Count == 0)
+            if (columnNamesAndTheirValue.Count == 0)
             {
                 return null;
             }
 
-            object[] attColumn = prp.GetCustomAttributes(typeof(ColumnAttribute), false);
+            Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
 
-            if (attColumn.Length != 0)
+            if (columnAttributes.Length != 0)
             {
                 string columnNameInObject;
 
-                foreach (ColumnAttribute atr in attColumn)
+                foreach (ColumnAttribute attribute in columnAttributes)
                 {
-                    if (atr._columnName == null)
+                    if (attribute._columnName == null)
                     {
-                        columnNameInObject = ConvertObjectNameToString(prp.Name);
+                        columnNameInObject = ConvertObjectNameToString(property.Name);
                     }
                     else
                     {
-                        columnNameInObject = atr._columnName;
+                        columnNameInObject = attribute._columnName;
                     }
 
-                    return columnNameAndItsValue[columnNameInObject];
+                    return columnNamesAndTheirValue[columnNameInObject];
                 }
             }
 
             return null;
         }
 
-        public object MapTableIntoObject(object obj, SqlDataReader reader)
+        public Object MapTableIntoObject(Object instance, SqlDataReader reader)
         {
-
-            Dictionary<string, object> columnNameAndItsValue = CreateDictionaryFromTable(reader);
+            Dictionary<string, Object> columnNamesAndTheirValues = CreateDictionaryFromTable(reader);
             reader.Close();
-            Type type = obj.GetType();
-            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            PropertyInfo[] props = type.GetProperties(bindingFlags);
+            Type instanceType = instance.GetType();
+            PropertyInfo[] properties = GetTypeProperties(instanceType);
 
-            foreach (PropertyInfo prp in props)
+            foreach (PropertyInfo property in properties)
             {
-                MethodInfo strGetter = prp.GetGetMethod(nonPublic: true);
-                object[] attColumn = prp.GetCustomAttributes(typeof(ColumnAttribute), false);
-                object[] attOneToOne = prp.GetCustomAttributes(typeof(OneToOneAttribute), false);
+                Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
+                Object[] oneToOneAttributes = property.GetCustomAttributes(typeof(OneToOneAttribute), false);
 
-                if (attColumn.Length == 0)
+                if (columnAttributes.Length == 0)
                 {
-                    string columnName = ConvertObjectNameToString(prp.Name);
+                    string columnName = ConvertObjectNameToString(property.Name);
                 }
 
                 else
                 {
-                    if (attOneToOne.Length != 0) { continue; }
+                    if (oneToOneAttributes.Length != 0) { continue; }
 
                     string columnNameInObject;
 
-                    foreach (ColumnAttribute atr in attColumn)
+                    foreach (ColumnAttribute atr in columnAttributes)
                     {
                         if (atr._columnName == null)
                         {
-                            columnNameInObject = ConvertObjectNameToString(prp.Name);
+                            columnNameInObject = ConvertObjectNameToString(property.Name);
                         }
                         else
                         {
                             columnNameInObject = atr._columnName;
                         }
 
-                        var value = columnNameAndItsValue[columnNameInObject];
-                        prp.SetValue(obj, value, null);
+                        var value = columnNamesAndTheirValues[columnNameInObject];
+                        property.SetValue(instance, value, null);
                     }
                 }
             }
 
-            return obj;
+            return instance;
         }
 
-        public object SetCertainListField(object parent, object children, PropertyInfo prp)
+        public Object SetCertainListField(Object parent, Object children, PropertyInfo property)
         {
             IList childTmp = children as IList;
-            IList list = Activator.CreateInstance(prp.PropertyType) as IList;
+            IList list = Activator.CreateInstance(property.PropertyType) as IList;
 
             foreach (var it in childTmp)
             {
                 list.Add(it);
             }
 
-            prp.SetValue(parent, list, null);
+            property.SetValue(parent, list, null);
 
             return parent;
         }
 
-        public object SetCertainField(object parent, object child, PropertyInfo prp)
+        public Object SetCertainField(Object parent, Object child, PropertyInfo property)
         {
-            prp.SetValue(parent, child, null);
+            property.SetValue(parent, child, null);
 
             return parent;
         }
