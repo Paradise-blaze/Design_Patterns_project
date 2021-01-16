@@ -36,7 +36,8 @@ namespace Design_Patterns_project
 
     class Character
     {
-        string name;
+        [Column()]
+        string name { get; set; }
 
         public Character(string name)
         {
@@ -47,15 +48,20 @@ namespace Design_Patterns_project
     class Wizard : Character
     {
         [PKey()]
-        int id;
-        int health;
-        double magicPower;
+        [Column()]
+        int id { get; set; }
+
+        [Column()]
+        int health { get; set; }
+
+        [Column("magic power")]
+        double magicPower { get; set; }
 
         [OneToMany()]
-        List<Dragon> dragons1 = new List<Dragon>();
+        List<Dragon> dragons1 { get; set; } = new List<Dragon>();
 
         [OneToMany()]
-        List<Dragon> dragons2 = new List<Dragon>();
+        List<Dragon> dragons2 { get; set; } = new List<Dragon>();
 
         public Wizard(string name, int health, double magicPower) : base(name)
         {
@@ -68,7 +74,8 @@ namespace Design_Patterns_project
     {
         [Column()]
         int health { get; set; }
-        string name;
+        [Column("mythical name")]
+        string name { get; set; }
 
         public MythicalCreature(int health, string name)
         {
@@ -79,7 +86,10 @@ namespace Design_Patterns_project
 
     class Dragon : MythicalCreature
     {
-        int blastPower;
+        [Column("blast power")]
+        int blastPower { get; set; }
+
+        [Column()]
         int endurance { get; set; }
 
         public Dragon(int health, string name, int blastPower, int endurance) : base(health, name)
@@ -91,8 +101,11 @@ namespace Design_Patterns_project
 
     class GoldDragon : Dragon
     {
-        int mineralHunger;
-        double preciousness;
+        [Column("mineral hunger")]
+        int mineralHunger { get; set; }
+
+        [Column()]
+        double preciousness { get; set; }
 
         public GoldDragon(int health, string name, int fireCapacity, int endurance, int mineralHunger, double preciousness)
             : base(health, name, fireCapacity, endurance)
@@ -104,15 +117,17 @@ namespace Design_Patterns_project
 
     class IceDragon : Dragon
     {
-        int iceCapacity;
-        double timeFreeze;
+        [Column("ice capacity")]
+        int iceCapacity { get; set; }
+
+        [Column("time freeze")]
+        double timeFreeze { get; set; }
 
         public IceDragon(int health, string name, int fireCapacity, int endurance, int iceCapacity, double timeFreeze)
             : base(health, name, fireCapacity, endurance)
         {
             this.iceCapacity = iceCapacity;
             this.timeFreeze = timeFreeze;
-
         }
     }
 }

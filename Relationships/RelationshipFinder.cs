@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Design_Patterns_project.Attributes;
 using System.Reflection;
-using System.Linq;
 
 namespace Design_Patterns_project.Relationships
 {
@@ -12,12 +11,7 @@ namespace Design_Patterns_project.Relationships
         {
             List<Relationship> oneToOneRelationships = new List<Relationship>();
             BindingFlags bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            MemberInfo[] memberArray = instanceType.GetFields(bindingFlag)
-                                            .Cast<MemberInfo>()
-                                            .Concat(instanceType.GetProperties(bindingFlag))
-                                            .Where(val => !(val.Name[0] == '<'))
-                                            .ToArray();
-
+            PropertyInfo[] propertiesArray = instanceType.GetProperties(bindingFlag);
             Type attr;
 
             switch (kind)
@@ -36,15 +30,15 @@ namespace Design_Patterns_project.Relationships
                     break;
             }
 
-            foreach (var member in memberArray)
+            foreach (var property in propertiesArray)
             {
-                Object[] attributes = member.GetCustomAttributes(attr, false);
+                Object[] attributes = property.GetCustomAttributes(attr, false);
 
                 if (attributes.Length != 0)
                 {
                     Type first = instanceType;
                     
-                    Relationship oneToOneRelationship = new Relationship(first, member, kind);
+                    Relationship oneToOneRelationship = new Relationship(first, property, kind);
                     oneToOneRelationships.Add(oneToOneRelationship);
                 }
             }

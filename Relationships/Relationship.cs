@@ -14,33 +14,19 @@ namespace Design_Patterns_project.Relationships
     class Relationship
     {
         public Type _firstMember { private set; get; }
-        public MemberInfo _secondMember { private set; get; }
+        public PropertyInfo _secondMember { private set; get; }
         public RelationshipKind _kind { private set; get; }
 
-        public Relationship(Type first, MemberInfo second, RelationshipKind kind)
+        public Relationship(Type first, PropertyInfo second, RelationshipKind kind)
         {
             this._firstMember = first;
             this._secondMember = second;
             this._kind = kind;
         }
 
-        public Type GetSecondMemberType() // determine whether it's field or property
-        {
-            if (this._secondMember.MemberType == MemberTypes.Field)
-                return typeof(FieldInfo);
-            else // this._secondMember.MemberType == MemberTypes.Property
-                return typeof(PropertyInfo);
-        }
-
         public Type GetSecondType()
         {
-            Type type = GetSecondMemberType();
-
-            if (type == typeof(FieldInfo))
-                return ((FieldInfo)this._secondMember).FieldType;
-
-            else // type == typeof(PropertyInfo)
-                return ((PropertyInfo)this._secondMember).PropertyType;
+            return ((PropertyInfo)this._secondMember).PropertyType;
         }
 
         public string GetSecondName()
