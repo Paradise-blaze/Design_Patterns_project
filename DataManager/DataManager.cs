@@ -28,19 +28,16 @@ namespace Design_Patterns_project
             this._msSqlConnection = new MsSqlConnection(config);
         }
 
-        public void OpenConnection()
+        public void CreateTable(Object instance)
         {
-            this._msSqlConnection.ConnectAndOpen();
-        }
+            List<Tuple<string, object>> columnsAndValuesList = _dataMapper.GetColumnsAndValues(instance);
+            object primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(instance);
+            string tableName = _dataMapper.GetTableName(instance);
+            string query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName);
 
-        public void CloseConnection()
-        {
-            this._msSqlConnection.Dispose();
-        }
-
-        public void CreateTable(Type objectType)
-        {
-
+            _msSqlConnection.ConnectAndOpen();
+            _msSqlConnection.ExecuteQuery(query);
+            _msSqlConnection.Dispose();
         }
 
         public void CreateTable(Type objectType, List<PropertyInfo> columnsBasedOnProperties)
@@ -58,10 +55,6 @@ namespace Design_Patterns_project
             {
                 rel.PrintInfo();
             }*/
-
-            Dragon d = new Dragon(200, "Something", 20, 10);
-
-            Console.WriteLine(_dataMapper.ConvertObjectNameToString(d));
             
         }
 
@@ -89,7 +82,7 @@ namespace Design_Patterns_project
         {
             try
             {
-                TryInherit(lastMembersOfInheritanceHierarchy, mode);
+                TryToInherit(lastMembersOfInheritanceHierarchy, mode);
             }
             catch (Exception e)
             {
@@ -97,7 +90,7 @@ namespace Design_Patterns_project
             }
         }
 
-        public void TryInherit(List<Object> lastMembersOfInheritanceHierarchy, int mode)
+        public void TryToInherit(List<Object> lastMembersOfInheritanceHierarchy, int mode)
         {
             switch (mode)
             {

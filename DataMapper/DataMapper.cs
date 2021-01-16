@@ -13,21 +13,21 @@ namespace Design_Patterns_project
         {
             BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             PropertyInfo[] typeProperties = type.GetProperties(bindingFlags);
+
             return typeProperties;
         }
 
-        public string GetTableName(Object t)
+        public string GetTableName(Object instance)
         {
-            TableAttribute attr = (TableAttribute)Attribute.GetCustomAttribute(t.GetType(), typeof(TableAttribute));
+            TableAttribute tableAttribute = (TableAttribute)Attribute.GetCustomAttribute(instance.GetType(), typeof(TableAttribute));
 
-            if (attr == null)
+            if (tableAttribute == null)
             {
-                Console.WriteLine("The attribute was not found.");
-                return ConvertObjectNameToString(t);
+                return instance.GetType().Name;
             }
             else
             {
-                return attr._tableName;
+                return tableAttribute._tableName;
             }
         }
 
@@ -43,7 +43,7 @@ namespace Design_Patterns_project
 
                 if (columnAttributes.Length == 0)
                 {
-                    string columnName = ConvertObjectNameToString(property.Name);
+                    string columnName = property.Name;
                     columnNames.Add(columnName);
                 }
                 else
@@ -78,7 +78,7 @@ namespace Design_Patterns_project
 
                 if (columnAttribute._columnName == null)
                 {
-                    columnName = ConvertObjectNameToString(property.Name);
+                    columnName = property.Name;
                 }
                 else
                 {
@@ -86,9 +86,10 @@ namespace Design_Patterns_project
                 }
 
                 Object[] oneToOneAttributes = property.GetCustomAttributes(typeof(OneToOneAttribute), false);
+                Object[] oneToManyAttributes = property.GetCustomAttributes(typeof(OneToManyAttribute), false);
 
                 //foreign key mapping
-                if (oneToOneAttributes.Length != 0)
+                if (oneToOneAttributes.Length != 0 || oneToManyAttributes.Length != 0)
                 {
                     if (value != null)
                     {
@@ -145,7 +146,7 @@ namespace Design_Patterns_project
 
                     if (columnAttribute._columnName == null)
                     {
-                        columnName = ConvertObjectNameToString(property.Name);
+                        columnName = property.Name;
                     }
                     else
                     {
@@ -157,11 +158,6 @@ namespace Design_Patterns_project
             }
 
             return null;
-        }
-
-        public string ConvertObjectNameToString(Object instance)
-        {
-            return instance.GetType().Name;
         }
 
         public Dictionary<string, Object> CreateDictionaryFromTable(SqlDataReader reader)
@@ -199,7 +195,7 @@ namespace Design_Patterns_project
                 {
                     if (attribute._columnName == null)
                     {
-                        columnNameInObject = ConvertObjectNameToString(property.Name);
+                        columnNameInObject = property.Name;
                     }
                     else
                     {
@@ -227,7 +223,7 @@ namespace Design_Patterns_project
 
                 if (columnAttributes.Length == 0)
                 {
-                    string columnName = ConvertObjectNameToString(property.Name);
+                    string columnName = property.Name;
                 }
 
                 else
@@ -240,7 +236,7 @@ namespace Design_Patterns_project
                     {
                         if (atr._columnName == null)
                         {
-                            columnNameInObject = ConvertObjectNameToString(property.Name);
+                            columnNameInObject = property.Name;
                         }
                         else
                         {
