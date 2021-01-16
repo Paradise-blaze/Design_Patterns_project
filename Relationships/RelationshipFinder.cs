@@ -10,25 +10,15 @@ namespace Design_Patterns_project.Relationships
         private List<Relationship> FindRelationship(Type instanceType, RelationshipKind kind)
         {
             List<Relationship> oneToOneRelationships = new List<Relationship>();
-            BindingFlags bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            PropertyInfo[] propertiesArray = instanceType.GetProperties(bindingFlag);
-            Type attr;
-
-            switch (kind)
+            PropertyInfo[] propertiesArray = DataMapper.GetTypeProperties(instanceType);
+            
+            Type attr = kind switch
             {
-                case RelationshipKind.OneToOne:
-                    attr = typeof(OneToOneAttribute);
-                    break;
-                case RelationshipKind.OneToMany:
-                    attr = typeof(OneToManyAttribute);
-                    break;
-                case RelationshipKind.ManyToMany:
-                    attr = typeof(ManyToManyAttribute);
-                    break;
-                default:
-                    attr = null;
-                    break;
-            }
+                RelationshipKind.OneToOne => typeof(OneToOneAttribute),
+                RelationshipKind.OneToMany => typeof(OneToManyAttribute),
+                RelationshipKind.ManyToMany => typeof(ManyToManyAttribute),
+                _ => null,
+            };
 
             foreach (var property in propertiesArray)
             {
