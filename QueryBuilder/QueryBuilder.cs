@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Design_Patterns_project.SqlConditions;
+using Design_Patterns_project.SqlCondition;
 
 namespace Design_Patterns_project.QueryBuilder
 {

@@ -1,18 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Design_Patterns_project.Relationships;
+using orm.Query;
+using Design_Patterns_project.Connection;
 
 namespace Design_Patterns_project
 {
     class DataManager
     {
         //DataMapper _dataMapper = new DataMapper();
-        //DatabaseConnection _databaseConnection = new DatabaseConnection();
-        //QueryBuilder _queryBuilder = new QueryBuilder();
+        MsSqlConnection _msSqlConnection;
+        QueryBuilder _queryBuilder = new QueryBuilder();
         //WorkUnit _workUnit = new WorkUnit();
         TableInheritance _tableInheritance = new TableInheritance();
+        RelationshipFinder _relationshipFinder = new RelationshipFinder();
+        /*List<Relationship> _oneToOneRelationships = new List<Relationship>();
+        List<Relationship> _oneToManyRelationships = new List<Relationship>();
+        List<Relationship> _manyToManyRelationships = new List<Relationship>();*/ //these variables should be in functions
 
-        public void CreateTable(string name, List<FieldInfo> fList)
+        public DataManager() { } //for tests only
+        public DataManager(string serverName, string databaseName, string user, string password)
+        {
+            MsSqlConnectionConfig config = new MsSqlConnectionConfig(serverName, databaseName, user, password);
+            this._msSqlConnection = new MsSqlConnection(config);
+        }
+        public DataManager(string serverName, string databaseName)
+        {
+            MsSqlConnectionConfig config = new MsSqlConnectionConfig(serverName, databaseName);
+            this._msSqlConnection = new MsSqlConnection(config);
+        }
+
+        public void OpenConnection()
+        {
+            this._msSqlConnection.ConnectAndOpen();
+        }
+
+        public void CloseConnection()
+        {
+            this._msSqlConnection.Dispose();
+        }
+
+        public void CreateTable(Type objectType)
+        {
+
+        }
+
+        public void CreateTable(Type objectType, List<MemberInfo> fList)
         {
             //string query = _queryBuilder.GetCreateQuery(name, fList);
             //_databaseConnection.ExecuteCreateCommand(query);
@@ -20,6 +54,12 @@ namespace Design_Patterns_project
             foreach (var attr in fieldArray[0].GetCustomAttributes())
                 Console.WriteLine(attr);
             Console.WriteLine();*/
+
+            List<Relationship> oneToMany = this._relationshipFinder.FindOneToMany(objectType);
+
+            foreach (var rel in oneToMany)
+                rel.PrintInfo();
+            
         }
 
         public void Select()
@@ -59,23 +99,23 @@ namespace Design_Patterns_project
             switch (mode)
             {
                 case 0: //SingleInheritance
-                    List<FieldInfo> fieldList = _tableInheritance.InheritSingle(lastMembers);
+                    List<MemberInfo> memberList = _tableInheritance.InheritSingle(lastMembers);
                     Type mainType = _tableInheritance.GetMainType(lastMembers[0]);
-                    CreateTable(mainType.Name, fieldList);
+                    CreateTable(mainType, memberList);
                     
                     break;
                 case 1: //ClassInheritance
-                    Dictionary<Type, List<FieldInfo>> typeMap = _tableInheritance.InheritClass(lastMembers);
+                    Dictionary<Type, List<MemberInfo>> typeMap = _tableInheritance.InheritClass(lastMembers);
 
                     foreach (var pair in typeMap)
-                        CreateTable(pair.Key.Name, pair.Value);
+                        CreateTable(pair.Key, pair.Value);
 
                     break;
                 case 2: //ConcreteInheritance
-                    Dictionary<Type, List<FieldInfo>> singleMap = _tableInheritance.InheritConcrete(lastMembers);
+                    Dictionary<Type, List<MemberInfo>> singleMap = _tableInheritance.InheritConcrete(lastMembers);
 
                     foreach (var pair in singleMap)
-                        CreateTable(pair.Key.Name, pair.Value);
+                        CreateTable(pair.Key, pair.Value);
 
                     break;
                 default:

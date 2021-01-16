@@ -1,5 +1,5 @@
 ﻿using System;
-using Design_Patterns_project.Connection;
+using Design_Patterns_project.Attributes;
 using System.Collections.Generic;
 
 namespace Design_Patterns_project
@@ -13,7 +13,7 @@ namespace Design_Patterns_project
             //remote -> "den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_"
             //local -> "DESKTOP-HVUO0CP", "TestDB"
 
-            MsSqlConnectionConfig remoteConfig = new MsSqlConnectionConfig("den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_");
+            /*MsSqlConnectionConfig remoteConfig = new MsSqlConnectionConfig("den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_");
             MsSqlConnectionConfig localConfig = new MsSqlConnectionConfig("DESKTOP-HVUO0CP", "TestDB");
 
             MsSqlConnection connection = new MsSqlConnection(remoteConfig);
@@ -29,6 +29,7 @@ namespace Design_Patterns_project
             connection.ExecuteQuery(testInsertQuery);
             output = connection.ExecuteSelectQuery(testSelectQuery);
             Console.WriteLine(output);
+            connection.Dispose();*/
 
             connection.ExecuteQuery(testDeleteQuery);
             output = connection.ExecuteSelectQuery(testSelectQuery);
@@ -43,7 +44,7 @@ namespace Design_Patterns_project
             DataManager mythicalManager = new DataManager();
             List<Object> creatures = new List<Object> () { iceDragon, goldDragon };
             List<Object> wizards = new List<Object>() { new Wizard("Romas", 10, 2.41) };
-            mythicalManager.Inherit(creatures, 0);
+            mythicalManager.Inherit(creatures, 2);
             mythicalManager.Inherit(wizards, 1);
             Console.WriteLine("Utter success");
         }
@@ -51,7 +52,8 @@ namespace Design_Patterns_project
 
     class Character
     {
-        string name;
+        [Column()]
+        string name { get; set; }
 
         public Character(string name)
         {
@@ -61,10 +63,21 @@ namespace Design_Patterns_project
 
     class Wizard : Character
     {
-        int health;
-        double magicPower;
+        [PKey()]
+        [Column()]
+        int id { get; set; }
 
-        List<Dragon> dragons = new List<Dragon>();
+        [Column()]
+        int health { get; set; }
+
+        [Column("magic power")]
+        double magicPower { get; set; }
+
+        [OneToMany()]
+        List<Dragon> dragons1 { get; set; } = new List<Dragon>();
+
+        [OneToMany()]
+        List<Dragon> dragons2 { get; set; } = new List<Dragon>();
 
         public Wizard(string name, int health, double magicPower) : base(name)
         {
@@ -75,8 +88,10 @@ namespace Design_Patterns_project
 
     class MythicalCreature
     {
-        int health;
-        string name;
+        [Column()]
+        int health { get; set; }
+        [Column("mythical name")]
+        string name { get; set; }
 
         public MythicalCreature(int health, string name)
         {
@@ -87,20 +102,26 @@ namespace Design_Patterns_project
 
     class Dragon : MythicalCreature
     {
-        int fireCapacity;
-        int endurance;
+        [Column("blast power")]
+        int blastPower { get; set; }
 
-        public Dragon(int health, string name, int fireCapacity, int endurance) : base(health, name)
+        [Column()]
+        int endurance { get; set; }
+
+        public Dragon(int health, string name, int blastPower, int endurance) : base(health, name)
         {
-            this.fireCapacity = fireCapacity;
+            this.blastPower = blastPower;
             this.endurance = endurance;
         }
     }
 
     class GoldDragon : Dragon
     {
-        int mineralHunger;
-        double preciousness;
+        [Column("mineral hunger")]
+        int mineralHunger { get; set; }
+
+        [Column()]
+        double preciousness { get; set; }
 
         public GoldDragon(int health, string name, int fireCapacity, int endurance, int mineralHunger, double preciousness)
             : base(health, name, fireCapacity, endurance)
@@ -112,16 +133,17 @@ namespace Design_Patterns_project
 
     class IceDragon : Dragon
     {
-        int iceCapacity;
-        double timeFreeze;
+        [Column("ice capacity")]
+        int iceCapacity { get; set; }
+
+        [Column("time freeze")]
+        double timeFreeze { get; set; }
 
         public IceDragon(int health, string name, int fireCapacity, int endurance, int iceCapacity, double timeFreeze)
             : base(health, name, fireCapacity, endurance)
         {
             this.iceCapacity = iceCapacity;
             this.timeFreeze = timeFreeze;
-
-
         }
     }
 }
