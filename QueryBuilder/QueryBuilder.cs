@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using Design_Patterns_project.SqlCondition;
 
-namespace orm.Query
+namespace Design_Patterns_project.QueryBuilder
 {
     class QueryBuilder
     {
 
         public QueryBuilder() { }
 
-        public string createInsertQuery(string tableName, List<Tuple<string, object>> columns)
+        public string CreateInsertQuery(string tableName, List<Tuple<string, object>> columns)
         {
             string returnQuery = "INSERT INTO " + tableName + "(";
             foreach (Tuple<string, object> it in columns)

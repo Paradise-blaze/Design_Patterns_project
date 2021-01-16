@@ -15,12 +15,28 @@ namespace Design_Patterns_project
 
             /*MsSqlConnectionConfig remoteConfig = new MsSqlConnectionConfig("den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_");
             MsSqlConnectionConfig localConfig = new MsSqlConnectionConfig("DESKTOP-HVUO0CP", "TestDB");
-            MsSqlConnection connection = new MsSqlConnection(localConfig);
+
+            MsSqlConnection connection = new MsSqlConnection(remoteConfig);
             connection.ConnectAndOpen();
-            string query = "SELECT * FROM dbo.Players;";
-            string output = connection.ExecuteSelectCommand(query);
+
+            string testSelectQuery = "SELECT * FROM dbo.Players;";
+            string testInsertQuery = "INSERT INTO dbo.Players (PlayerID,Name,Surname,Age,Nick) VALUES (4,'Gerard','Pique',33,'Lion');";
+            string testDeleteQuery = "DELETE FROM dbo.Players WHERE PlayerID = 4;";
+
+            string output = connection.ExecuteSelectQuery(testSelectQuery);
+            Console.WriteLine(output);
+
+            connection.ExecuteQuery(testInsertQuery);
+            output = connection.ExecuteSelectQuery(testSelectQuery);
             Console.WriteLine(output);
             connection.Dispose();*/
+
+            connection.ExecuteQuery(testDeleteQuery);
+            output = connection.ExecuteSelectQuery(testSelectQuery);
+            Console.WriteLine(output);
+
+
+            connection.Dispose();
 
 
             IceDragon iceDragon = new IceDragon(200, "Winterrrer", 10, 20, 20, 50);
