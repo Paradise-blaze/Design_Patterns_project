@@ -43,10 +43,13 @@ namespace Design_Patterns_project
             GoldDragon goldDragon = new GoldDragon(220, "Sauman", 10, 20, 40, 40);
             DataManager mythicalManager = new DataManager();
             List<Object> creatures = new List<Object> () { iceDragon, goldDragon };
-            List<Object> wizards = new List<Object>() { new Wizard("Romas", 10, 2.41) };
+            List<Object> wizards = new List<Object>() { new Wizard("Romas", 1, 10, 2.41) };
             mythicalManager.Inherit(creatures, 2);
             mythicalManager.Inherit(wizards, 1);
             Console.WriteLine("Utter success");
+            Wizard gandalf = new Wizard("Gandalf", 2, 20, 2.31);
+            gandalf.d = iceDragon;
+            mythicalManager.CreateTable(gandalf);
         }
     }
 
@@ -73,15 +76,19 @@ namespace Design_Patterns_project
         [Column("magic power")]
         double magicPower { get; set; }
 
+        [OneToOne()]
+        public Dragon d { get; set; }
+
         [OneToMany()]
         List<Dragon> dragons1 { get; set; } = new List<Dragon>();
 
         [OneToMany()]
         List<Dragon> dragons2 { get; set; } = new List<Dragon>();
 
-        public Wizard(string name, int health, double magicPower) : base(name)
+        public Wizard(string name, int id, int health, double magicPower) : base(name)
         {
             this.health = health;
+            this.id = id;
             this.magicPower = magicPower;
         }
     }
@@ -102,6 +109,10 @@ namespace Design_Patterns_project
 
     class Dragon : MythicalCreature
     {
+        [PKey()]
+        [Column()]
+        int id { get; set; }
+
         [Column("blast power")]
         int blastPower { get; set; }
 
@@ -133,8 +144,12 @@ namespace Design_Patterns_project
 
     class IceDragon : Dragon
     {
+        [PKey()]
+        [Column()]
+        int id { get; set; }
+
         [Column("ice capacity")]
-        int iceCapacity { get; set; }
+        public int iceCapacity { get; set; }
 
         [Column("time freeze")]
         double timeFreeze { get; set; }

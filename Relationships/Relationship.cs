@@ -13,11 +13,11 @@ namespace Design_Patterns_project.Relationships
 
     class Relationship
     {
-        public Type _firstMember { private set; get; }
+        public Object _firstMember { private set; get; }
         public PropertyInfo _secondMember { private set; get; }
         public RelationshipKind _kind { private set; get; }
 
-        public Relationship(Type first, PropertyInfo second, RelationshipKind kind)
+        public Relationship(Object first, PropertyInfo second, RelationshipKind kind)
         {
             this._firstMember = first;
             this._secondMember = second;

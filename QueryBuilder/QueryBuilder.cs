@@ -54,7 +54,7 @@ namespace Design_Patterns_project.SqlCommands
             {typeof(System.Int32),"int" },
         };
 
-        public string CreateCreateTableQuery(string tableName, List<Tuple<string, object>> columns, object primaryKey)
+        public string CreateCreateTableQuery(string tableName, List<Tuple<string, object>> columns, object primaryKey, string parentTableName = "", string foreignKeyName = "")
         {
             string returnQuery = "IF NOT EXISTS ( SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo." + tableName + "') and TYPE in (N'U')) BEGIN";
             returnQuery += " CREATE TABLE " + tableName + "(";
@@ -72,6 +72,12 @@ namespace Design_Patterns_project.SqlCommands
             }
 
             returnQuery = returnQuery.Remove(returnQuery.Length - 2);
+
+            if (!parentTableName.Equals(""))
+            {
+                returnQuery += " FOREIGN KEY(" + parentTableName + foreignKeyName + ") REFERENCES " + parentTableName + "(" + parentTableName + foreignKeyName + ")";
+            }
+
             returnQuery += ") END;";
 
             return returnQuery;
