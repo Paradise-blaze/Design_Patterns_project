@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Data;
 using System.Data.SqlClient;
+using System.Collections.Generic;
 
 
 namespace Design_Patterns_project.Connection
@@ -93,6 +94,7 @@ namespace Design_Patterns_project.Connection
                 while(dataReader.Read()){
                     output += ReadSingleRow((IDataRecord)dataReader,colsAmount,colWidht);
                 }
+                dataReader.Close();
 
                 return output;
 
@@ -122,6 +124,40 @@ namespace Design_Patterns_project.Connection
             }
         }
 
+
+        // Check if table of given name exists
+        public bool CheckIfTableExists(string tableName){
+            string sqlQuery = "SELECT CASE WHEN OBJECT_ID('dbo."+tableName+"', 'U') IS NOT NULL THEN 1 ELSE 0 END;";
+            SqlCommand command = new SqlCommand(sqlQuery,this._connection);
+            int result = (Int32)command.ExecuteScalar();
+            return (result == 1);
+        }
+
+
+        // Return list of column names of given table 
+        public List<string> GetColumnNamesFromTable(string tableName){
+
+            List<string> columns = new List<string>();
+
+            if (this.CheckIfTableExists(tableName)){
+                string sqlQuery = "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '"+tableName+"'";
+                
+                SqlCommand command = new SqlCommand(sqlQuery,this._connection);
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    IDataRecord record = (IDataRecord)reader;
+                    columns.Add(String.Format("{0}",record[0]));
+                }
+
+                reader.Close();
+            }
+
+            return columns;
+        }
+
+
         public string HandleSqlException(SqlException ex){
             StringBuilder errorMessages = new StringBuilder();
             for (int i = 0; i < ex.Errors.Count; i++)
@@ -135,6 +171,7 @@ namespace Design_Patterns_project.Connection
                 }
                 return errorMessages.ToString();
         }
+
 
         public string HandleOtherException(Exception ex){
             StringBuilder errorMessages = new StringBuilder();
