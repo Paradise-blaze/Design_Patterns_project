@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Reflection;
 using Design_Patterns_project.Relationships;
 using Design_Patterns_project.SqlCommands;
@@ -28,16 +29,69 @@ namespace Design_Patterns_project
             this._msSqlConnection = new MsSqlConnection(config);
         }
 
+        // change querybuilder functions
         public void CreateTable(Object instance)
         {
-            List<Tuple<string, object>> columnsAndValuesList = _dataMapper.GetColumnsAndValues(instance);
-            object primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(instance);
-            string tableName = _dataMapper.GetTableName(instance);
-            string query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName);
+            CreateTable(instance, "", "");
+        }
 
+        private void CreateTable(Object instance, string parentTableName, string foreignKeyName)
+        {
+            List<Tuple<string, Object>> columnsAndValuesList = _dataMapper.GetColumnsAndValues(instance);
+            string primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(instance);
+            string tableName = _dataMapper.GetTableName(instance);
+            string query;
+
+            Console.WriteLine(tableName);
+
+            if (parentTableName.Equals(""))
+            {
+                query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName);
+            }
+            else
+            {
+                query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName, parentTableName, foreignKeyName);
+            }
+            /*
             _msSqlConnection.ConnectAndOpen();
             _msSqlConnection.ExecuteQuery(query);
             _msSqlConnection.Dispose();
+            */
+            // foreign key mapping
+            List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(instance);
+            List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(instance);
+            // association table mapping
+            List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(instance);
+
+            if (oneToOne.Count != 0)
+            {
+                foreach (var relation in oneToOne)
+                {
+                    PropertyInfo property = relation._secondMember;
+                    MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
+                    Object value = strGetter.Invoke(instance, null);
+                    CreateTable(value, tableName, primaryKeyName);
+                }
+            }
+            if (oneToMany.Count != 0)
+            {
+                foreach (var relation in oneToMany)
+                {
+                    PropertyInfo property = relation._secondMember;
+                    MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
+                    var values = strGetter.Invoke(instance, null);
+                    IList valueList = values as IList; 
+                    
+                    foreach (var value in valueList)
+                    {
+                        CreateTable(value, tableName, primaryKeyName);
+                    }
+                }
+            }
+            if (manyToMany.Count != 0)
+            {
+
+            }
         }
 
         public void CreateTable(Type objectType, List<PropertyInfo> columnsBasedOnProperties)

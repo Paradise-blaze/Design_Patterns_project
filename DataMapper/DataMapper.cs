@@ -41,7 +41,7 @@ namespace Design_Patterns_project
             {
                 Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
 
-                if (columnAttributes.Length == 0)
+                if (columnAttributes.Length == 0) //change this code (deal with names and attribute existence)
                 {
                     string columnName = property.Name;
                     columnNames.Add(columnName);
@@ -67,14 +67,13 @@ namespace Design_Patterns_project
                 MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
                 var value = strGetter.Invoke(instance, null);
                 string columnName;
-                Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
+                ColumnAttribute columnAttribute = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
 
-                if (columnAttributes.Length == 0)
+                if (columnAttribute == null)
                 {
                     continue;
                 }
 
-                ColumnAttribute columnAttribute = (ColumnAttribute)columnAttributes[0];
 
                 if (columnAttribute._columnName == null)
                 {
@@ -85,24 +84,15 @@ namespace Design_Patterns_project
                     columnName = columnAttribute._columnName;
                 }
 
-                Object[] oneToOneAttributes = property.GetCustomAttributes(typeof(OneToOneAttribute), false);
-                Object[] oneToManyAttributes = property.GetCustomAttributes(typeof(OneToManyAttribute), false);
+                OneToOneAttribute oneToOneAttribute = (OneToOneAttribute)property.GetCustomAttribute(typeof(OneToOneAttribute), false);
+                OneToManyAttribute oneToManyAttribute = (OneToManyAttribute)property.GetCustomAttribute(typeof(OneToManyAttribute), false);
+                ManyToManyAttribute manyToManyAttribute = (ManyToManyAttribute)property.GetCustomAttribute(typeof(ManyToManyAttribute), false);
 
-                //foreign key mapping
-                if (oneToOneAttributes.Length != 0 || oneToManyAttributes.Length != 0)
+                //foreign key mapping and association table mapping will solve this problem
+                if (oneToOneAttribute == null && oneToManyAttribute == null && manyToManyAttribute == null)
                 {
-                    if (value != null)
-                    {
-                        var foreignKey = FindPrimaryKey(value);
-                        value = foreignKey;
-                    }
-                    else
-                    {
-                        value = "null";
-                    }
+                    list.Add(new Tuple<string, Object>(columnName, value));
                 }
-
-                list.Add(new Tuple<string, Object>(columnName, value));
             }
 
             return list;
@@ -177,10 +167,10 @@ namespace Design_Patterns_project
 
         public Object GetValueOfForeignKey(PropertyInfo property, SqlDataReader reader)
         {
-            Dictionary<string, Object> columnNamesAndTheirValue = CreateDictionaryFromTable(reader);
+            Dictionary<string, Object> columnNamesAndTheirValues = CreateDictionaryFromTable(reader);
             reader.Close();
 
-            if (columnNamesAndTheirValue.Count == 0)
+            if (columnNamesAndTheirValues.Count == 0)
             {
                 return null;
             }
@@ -190,20 +180,18 @@ namespace Design_Patterns_project
             if (columnAttributes.Length != 0)
             {
                 string columnNameInObject;
-
-                foreach (ColumnAttribute attribute in columnAttributes)
+                ColumnAttribute columnAttribute = (ColumnAttribute)columnAttributes[0];
+                
+                if (columnAttribute._columnName == null)
                 {
-                    if (attribute._columnName == null)
-                    {
-                        columnNameInObject = property.Name;
-                    }
-                    else
-                    {
-                        columnNameInObject = attribute._columnName;
-                    }
-
-                    return columnNamesAndTheirValue[columnNameInObject];
+                    columnNameInObject = property.Name;
                 }
+                else
+                {
+                    columnNameInObject = columnAttribute._columnName;
+                }
+
+                return columnNamesAndTheirValues[columnNameInObject];
             }
 
             return null;

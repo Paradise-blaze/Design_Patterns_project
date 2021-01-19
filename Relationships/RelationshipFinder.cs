@@ -7,10 +7,10 @@ namespace Design_Patterns_project.Relationships
 {
     class RelationshipFinder
     {
-        private List<Relationship> FindRelationship(Type instanceType, RelationshipKind kind)
+        private List<Relationship> FindRelationship(Object instance, RelationshipKind kind)
         {
             List<Relationship> oneToOneRelationships = new List<Relationship>();
-            PropertyInfo[] propertiesArray = DataMapper.GetTypeProperties(instanceType);
+            PropertyInfo[] propertiesArray = DataMapper.GetTypeProperties(instance.GetType());
             
             Type attr = kind switch
             {
@@ -25,29 +25,27 @@ namespace Design_Patterns_project.Relationships
                 Object[] attributes = property.GetCustomAttributes(attr, false);
 
                 if (attributes.Length != 0)
-                {
-                    Type first = instanceType;
-                    
-                    Relationship oneToOneRelationship = new Relationship(first, property, kind);
+                {                    
+                    Relationship oneToOneRelationship = new Relationship(instance, property, kind);
                     oneToOneRelationships.Add(oneToOneRelationship);
                 }
             }
 
             return oneToOneRelationships;
         }
-        public List<Relationship> FindOneToOne(Type instanceType) 
+        public List<Relationship> FindOneToOne(Object instance) 
         {
-            return FindRelationship(instanceType, RelationshipKind.OneToOne);
+            return FindRelationship(instance, RelationshipKind.OneToOne);
         }
 
-        public List<Relationship> FindOneToMany(Type instanceType) 
+        public List<Relationship> FindOneToMany(Object instance) 
         {
-            return FindRelationship(instanceType, RelationshipKind.OneToMany);
+            return FindRelationship(instance, RelationshipKind.OneToMany);
         }
 
-        public List<Relationship> FindManToMany(Type instanceType) 
+        public List<Relationship> FindManyToMany(Object instance)
         { 
-            return FindRelationship(instanceType, RelationshipKind.ManyToMany);
+            return FindRelationship(instance, RelationshipKind.ManyToMany);
         }
     }
 }
