@@ -55,11 +55,11 @@ namespace Design_Patterns_project
                 Dictionary<string, string> tableAndForeignKey = new Dictionary<string, string> { {parentTableName, foreignKeyName } };
                 query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName, tableAndForeignKey);
             }
-            /*
+            
             _msSqlConnection.ConnectAndOpen();
             _msSqlConnection.ExecuteQuery(query);
             _msSqlConnection.Dispose();
-            */
+            
             // foreign key mapping
             List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(instance);
             List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(instance);
@@ -86,7 +86,7 @@ namespace Design_Patterns_project
                     var values = strGetter.Invoke(instance, null);
                     IList valueList = values as IList;
 
-                    CreateTable(valueList[0], parentTableName, primaryKeyName);
+                    CreateTable(valueList[0], tableName, primaryKeyName);
                 }
             }
 
@@ -106,7 +106,9 @@ namespace Design_Patterns_project
 
                     List<Tuple<string, Object>> foreignKeys = _dataMapper.GetAssociationTable(instance, secondInstance);
                     Dictionary<string, string> tablesAndForeignKeys = new Dictionary<string, string> { { tableName, primaryKeyName }, { memberTableName, memberTableKeyName } };
-
+                    
+                    // remove list of tuples 
+                    CreateTable(secondInstance);
                     CreateAssociationTable(mergedTablesName, tablesAndForeignKeys, foreignKeys);
                 }
             }
@@ -114,12 +116,14 @@ namespace Design_Patterns_project
 
         private void CreateAssociationTable(string tableName, Dictionary<string, string> tablesAndForeignKeys, List<Tuple<string, Object>> foreignKeys)
         {
-            string query = _queryBuilder.CreateCreateTableQuery(tableName, foreignKeys, "", tablesAndForeignKeys);
-            /*
+           
+            string query = _queryBuilder.CreateCreateTableQuery(tableName, null, "", tablesAndForeignKeys);
+            Console.WriteLine(query);
+            
             _msSqlConnection.ConnectAndOpen();
             _msSqlConnection.ExecuteQuery(query);
             _msSqlConnection.Dispose();
-            */
+            
         }
 
         private void CreateTable(Type objectType, List<PropertyInfo> columnsBasedOnProperties)
