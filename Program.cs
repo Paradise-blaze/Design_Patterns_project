@@ -48,7 +48,8 @@ namespace Design_Patterns_project
             mythicalManager.Inherit(wizards, 1);
             Console.WriteLine("Utter success");
             Wizard gandalf = new Wizard("Gandalf", 2, 20, 2.31);
-            gandalf.d = iceDragon;
+            gandalf.dragons1.Add(iceDragon);
+            gandalf.dragons2.Add(goldDragon);
             mythicalManager.CreateTable(gandalf);
         }
     }
@@ -76,14 +77,11 @@ namespace Design_Patterns_project
         [Column("magic power")]
         double magicPower { get; set; }
 
-        [OneToOne()]
-        public Dragon d { get; set; }
-
         [OneToMany()]
-        List<Dragon> dragons1 { get; set; } = new List<Dragon>();
+        public List<Dragon> dragons1 { get; set; } = new List<Dragon>();
 
-        [OneToMany()]
-        List<Dragon> dragons2 { get; set; } = new List<Dragon>();
+        [ManyToMany()]
+        public List<Dragon> dragons2 { get; set; } = new List<Dragon>();
 
         public Wizard(string name, int id, int health, double magicPower) : base(name)
         {

@@ -56,6 +56,58 @@ namespace Design_Patterns_project
             return columnNames;
         }
 
+        public List<Tuple<string, Object>> GetAssociationTable(Object instance1, Object instance2)
+        {
+            string columnName1 = "", columnName2 = "";
+            PropertyInfo foreignKeyProperty1 = FindPrimaryKeyProperty(instance1);
+            PropertyInfo foreignKeyProperty2 = FindPrimaryKeyProperty(instance2);
+
+            ColumnAttribute columnAttribute1 = (ColumnAttribute)foreignKeyProperty1.GetCustomAttribute(typeof(ColumnAttribute), false);
+            ColumnAttribute columnAttribute2 = (ColumnAttribute)foreignKeyProperty2.GetCustomAttribute(typeof(ColumnAttribute), false);
+
+            if (columnAttribute1 != null || columnAttribute2 != null)
+            {
+
+                if (columnAttribute1 != null)
+                {
+                    if (columnAttribute1._columnName == null)
+                    {
+                        columnName1 = foreignKeyProperty1.Name;
+                    }
+                    else
+                    {
+                        columnName1 = columnAttribute1._columnName;
+                    }
+                }
+
+                if (columnAttribute2 != null)
+                {
+                    if (columnAttribute2._columnName == null)
+                    {
+                        columnName2 = foreignKeyProperty2.Name;
+                    }
+                    else
+                    {
+                        columnName2 = columnAttribute2._columnName;
+                    }
+                }
+
+                MethodInfo strGetter1 = foreignKeyProperty1.GetGetMethod(nonPublic: true);
+                MethodInfo strGetter2 = foreignKeyProperty2.GetGetMethod(nonPublic: true);
+
+                var value1 = strGetter1.Invoke(instance1, null);
+                var value2 = strGetter2.Invoke(instance2, null);
+
+                Tuple<string, Object> columnAndValue1 = new Tuple<string, Object>(columnName1, value1);
+                Tuple<string, Object> columnAndValue2 = new Tuple<string, Object>(columnName2, value2);
+                List<Tuple<string, Object>> foreignKeys = new List<Tuple<string, Object>> { columnAndValue1, columnAndValue2 };
+
+                return foreignKeys;
+            }
+
+            return null;
+        }
+
         public List<Tuple<string, Object>> GetColumnsAndValues(Object instance)
         {
             List<Tuple<string, Object>> list = new List<Tuple<string, Object>> { };
@@ -113,6 +165,23 @@ namespace Design_Patterns_project
                     MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
                     primaryKey = strGetter.Invoke(instance, null);
                     return primaryKey;
+                }
+            }
+
+            return null;
+        }
+        public PropertyInfo FindPrimaryKeyProperty(Object instance)
+        {
+            Type instanceType = instance.GetType();
+            PropertyInfo[] properties = GetTypeProperties(instanceType);
+
+            foreach (PropertyInfo property in properties)
+            {
+                PKeyAttribute attribute = (PKeyAttribute)property.GetCustomAttribute(typeof(PKeyAttribute), false);
+
+                if (attribute != null)
+                {
+                    return property;
                 }
             }
 
