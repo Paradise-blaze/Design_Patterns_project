@@ -23,43 +23,5 @@ namespace Design_Patterns_project.Relationships
             this._secondMember = second;
             this._kind = kind;
         }
-
-        public Type GetSecondType()
-        {
-            return ((PropertyInfo)this._secondMember).PropertyType;
-        }
-
-        public string GetSecondName()
-        {
-            return this._secondMember.Name;
-        }
-
-        public bool IsSecondList()
-        {
-            Type type = GetSecondType();
-
-            return type.GetGenericTypeDefinition() == typeof(List<>);
-        }
-
-        public Type GetListParameter()
-        {
-            Type type = GetSecondType();
-
-            if (IsSecondList())
-                return type.GetGenericArguments()[0];
-
-            return null;
-        }
-        public void PrintInfo()
-        {
-            Console.WriteLine(this._firstMember);
-            Console.WriteLine(GetSecondType());
-            Console.WriteLine(GetSecondType().Name);
-            Console.WriteLine(GetListParameter().Name);
-            Console.WriteLine(GetSecondName());
-            Console.WriteLine();
-        }
-
-        
     }
 }

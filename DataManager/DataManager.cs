@@ -29,7 +29,11 @@ namespace Design_Patterns_project
             this._msSqlConnection = new MsSqlConnection(config);
         }
 
-        // change querybuilder functions
+        public string GetMergedNames(string name1, string name2)
+        {
+            return string.Compare(name1, name2) < 0 ? name1 + name2 : name2 + name1;
+        }
+
         public void CreateTable(Object instance)
         {
             CreateTable(instance, "", "");
@@ -42,15 +46,14 @@ namespace Design_Patterns_project
             string tableName = _dataMapper.GetTableName(instance);
             string query;
 
-            Console.WriteLine(tableName);
-
             if (parentTableName.Equals(""))
             {
                 query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName);
             }
             else
             {
-                query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName, parentTableName, foreignKeyName);
+                Dictionary<string, string> tableAndForeignKey = new Dictionary<string, string> { {parentTableName, foreignKeyName } };
+                query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName, tableAndForeignKey);
             }
             /*
             _msSqlConnection.ConnectAndOpen();
@@ -73,6 +76,7 @@ namespace Design_Patterns_project
                     CreateTable(value, tableName, primaryKeyName);
                 }
             }
+
             if (oneToMany.Count != 0)
             {
                 foreach (var relation in oneToMany)
@@ -80,21 +84,45 @@ namespace Design_Patterns_project
                     PropertyInfo property = relation._secondMember;
                     MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
                     var values = strGetter.Invoke(instance, null);
-                    IList valueList = values as IList; 
-                    
-                    foreach (var value in valueList)
-                    {
-                        CreateTable(value, tableName, primaryKeyName);
-                    }
+                    IList valueList = values as IList;
+
+                    CreateTable(valueList[0], parentTableName, primaryKeyName);
                 }
             }
+
             if (manyToMany.Count != 0)
             {
+                foreach (var relation in manyToMany)
+                {
+                    PropertyInfo property = relation._secondMember;
+                    MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
+                    var values = strGetter.Invoke(instance, null);
+                    IList valueList = values as IList;
+                    var secondInstance = valueList[0];
+                    
+                    string memberTableName = _dataMapper.GetTableName(secondInstance);
+                    string memberTableKeyName = _dataMapper.FindPrimaryKeyFieldName(secondInstance);
+                    string mergedTablesName = GetMergedNames(tableName, memberTableName);
 
+                    List<Tuple<string, Object>> foreignKeys = _dataMapper.GetAssociationTable(instance, secondInstance);
+                    Dictionary<string, string> tablesAndForeignKeys = new Dictionary<string, string> { { tableName, primaryKeyName }, { memberTableName, memberTableKeyName } };
+
+                    CreateAssociationTable(mergedTablesName, tablesAndForeignKeys, foreignKeys);
+                }
             }
         }
 
-        public void CreateTable(Type objectType, List<PropertyInfo> columnsBasedOnProperties)
+        private void CreateAssociationTable(string tableName, Dictionary<string, string> tablesAndForeignKeys, List<Tuple<string, Object>> foreignKeys)
+        {
+            string query = _queryBuilder.CreateCreateTableQuery(tableName, foreignKeys, "", tablesAndForeignKeys);
+            /*
+            _msSqlConnection.ConnectAndOpen();
+            _msSqlConnection.ExecuteQuery(query);
+            _msSqlConnection.Dispose();
+            */
+        }
+
+        private void CreateTable(Type objectType, List<PropertyInfo> columnsBasedOnProperties)
         {
             //string query = _queryBuilder.GetCreateQuery(name, fList);
             //_databaseConnection.ExecuteCreateCommand(query);
