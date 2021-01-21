@@ -17,10 +17,11 @@ namespace Design_Patterns_project
             //local -> "DESKTOP-HVUO0CP", "TestDB"
 
             // MsSqlConnectionConfig remoteConfig = new MsSqlConnectionConfig("den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_");
-            // MsSqlConnectionConfig localConfig = new MsSqlConnectionConfig("DESKTOP-HVUO0CP", "TestDB");
+            //MsSqlConnectionConfig localConfig = new MsSqlConnectionConfig("DESKTOP-HVUO0CP", "TestDB");
 
-            // MsSqlConnection connection = new MsSqlConnection(remoteConfig);
-            // connection.ConnectAndOpen();
+            //MsSqlConnection connection = new MsSqlConnection(localConfig);
+            //connection.ConnectAndOpen();
+            
 
             // string testSelectQuery = "SELECT * FROM dbo.Players;";
             // string testInsertQuery = "INSERT INTO dbo.Players (PlayerID,Name,Surname,Age,Nick) VALUES (4,'Gerard','Pique',33,'Lion');";
@@ -36,21 +37,26 @@ namespace Design_Patterns_project
             // output = connection.ExecuteSelectQuery(testSelectQuery);
             // Console.WriteLine(output);
 
-            // connection.Dispose();
+            //connection.Dispose();
 
 
             IceDragon iceDragon = new IceDragon(200, "Winterrrer", 10, 20, 20, 50);
             GoldDragon goldDragon = new GoldDragon(220, "Sauman", 10, 20, 40, 40);
-            DataManager mythicalManager = new DataManager();
+            DataManager mythicalManager = new DataManager("DESKTOP-HVUO0CP", "TestDB");
             List<Object> creatures = new List<Object> () { iceDragon, goldDragon };
             List<Object> wizards = new List<Object>() { new Wizard("Romas", 1, 10, 2.41) };
             mythicalManager.Inherit(creatures, 2);
             mythicalManager.Inherit(wizards, 1);
             Console.WriteLine("Utter success");
             Wizard gandalf = new Wizard("Gandalf", 2, 20, 2.31);
-            gandalf.dragons1.Add(iceDragon);
-            gandalf.dragons2.Add(goldDragon);
+            //gandalf.dragons1.Add(iceDragon);
+            //gandalf.dragons2.Add(iceDragon);
+            gandalf.dragon1 = iceDragon;
             mythicalManager.CreateTable(gandalf);
+            
+            
+            
+            
         }
     }
 
@@ -65,7 +71,7 @@ namespace Design_Patterns_project
         }
     }
 
-    class Wizard : Character
+    class Wizard
     {
         [PKey()]
         [Column()]
@@ -74,16 +80,21 @@ namespace Design_Patterns_project
         [Column()]
         int health { get; set; }
 
-        [Column("magic power")]
+        [Column("magic_power")]
         double magicPower { get; set; }
 
-        [OneToMany()]
-        public List<Dragon> dragons1 { get; set; } = new List<Dragon>();
+        [OneToOne]
+        public Dragon dragon1 {get; set;}
 
-        [ManyToMany()]
-        public List<Dragon> dragons2 { get; set; } = new List<Dragon>();
+        // test for all these relationships, prepare new classes
+        
+        // [OneToMany()]
+        // public List<Dragon> dragons1 { get; set; } = new List<Dragon>();
 
-        public Wizard(string name, int id, int health, double magicPower) : base(name)
+        // [ManyToMany()]
+        // public List<Dragon> dragons2 { get; set; } = new List<Dragon>();
+
+        public Wizard(string name, int id, int health, double magicPower)
         {
             this.health = health;
             this.id = id;
@@ -95,7 +106,7 @@ namespace Design_Patterns_project
     {
         [Column()]
         int health { get; set; }
-        [Column("mythical name")]
+        [Column("mythical_name")]
         string name { get; set; }
 
         public MythicalCreature(int health, string name)
@@ -111,7 +122,7 @@ namespace Design_Patterns_project
         [Column()]
         int id { get; set; }
 
-        [Column("blast power")]
+        [Column("blast_power")]
         int blastPower { get; set; }
 
         [Column()]
@@ -126,7 +137,7 @@ namespace Design_Patterns_project
 
     class GoldDragon : Dragon
     {
-        [Column("mineral hunger")]
+        [Column("mineral_hunger")]
         int mineralHunger { get; set; }
 
         [Column()]
@@ -146,10 +157,10 @@ namespace Design_Patterns_project
         [Column()]
         int id { get; set; }
 
-        [Column("ice capacity")]
+        [Column("ice_capacity")]
         public int iceCapacity { get; set; }
 
-        [Column("time freeze")]
+        [Column("time_freeze")]
         double timeFreeze { get; set; }
 
         public IceDragon(int health, string name, int fireCapacity, int endurance, int iceCapacity, double timeFreeze)

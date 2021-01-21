@@ -54,32 +54,38 @@ namespace Design_Patterns_project.SqlCommands
             {typeof(System.Int32),"int" },
         };
 
-        public string CreateCreateTableQuery(string tableName, List<Tuple<string, object>> columns, object primaryKey, Dictionary<string, string> tablesAndForeignKeys = "")
+        public string CreateCreateTableQuery(string tableName, List<Tuple<string, object>> columns, object primaryKey, Dictionary<string, string> tablesAndForeignKeys = null)
         {
             string returnQuery = "IF NOT EXISTS ( SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo." + tableName + "') and TYPE in (N'U')) BEGIN";
             returnQuery += " CREATE TABLE " + tableName + "(";
 
-            foreach (Tuple<string, object> it in columns)
+            if (columns != null)
             {
-                returnQuery += it.Item1 + " ";
-                returnQuery += CsTypesToSql[it.Item2.GetType()];
-                if (primaryKey.Equals(it.Item1))
+                foreach (Tuple<string, object> it in columns)
                 {
-                    returnQuery += " PRIMARY KEY,   ";
+                    returnQuery += it.Item1 + " ";
+                    returnQuery += CsTypesToSql[it.Item2.GetType()];
+                    if (primaryKey.Equals(it.Item1))
+                    {
+                        returnQuery += " PRIMARY KEY,   ";
+                    }
+                    else
+                        returnQuery += ", ";
                 }
-                else
-                    returnQuery += ", ";
             }
+            
 
-            returnQuery = returnQuery.Remove(returnQuery.Length - 2);
+            
 
+            // change INT into proper PK type
             if (tablesAndForeignKeys != null)
             {
                 foreach (var pair in tablesAndForeignKeys)
                 {
-                    returnQuery += " FOREIGN KEY(" + pair.Key + pair.Value + ") REFERENCES " + pair.Key + "(" + pair.Key + pair.Value + ")";
+                    returnQuery += pair.Key + pair.Value + " INT FOREIGN KEY REFERENCES " + pair.Key + "(" + pair.Value + ") ,"; // manyTomany
                 }
             }
+            returnQuery = returnQuery.Remove(returnQuery.Length - 2);
 
             returnQuery += ") END;";
 
