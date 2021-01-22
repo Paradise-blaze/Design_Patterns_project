@@ -17,13 +17,13 @@ namespace Design_Patterns_project
             return typeProperties;
         }
 
-        public string GetTableName(Object instance)
+        public string GetTableName(Type objectType)
         {
-            TableAttribute tableAttribute = (TableAttribute)Attribute.GetCustomAttribute(instance.GetType(), typeof(TableAttribute));
+            TableAttribute tableAttribute = (TableAttribute)Attribute.GetCustomAttribute(objectType, typeof(TableAttribute));
 
             if (tableAttribute == null)
             {
-                return instance.GetType().Name;
+                return objectType.Name;
             }
             else
             {
@@ -39,73 +39,23 @@ namespace Design_Patterns_project
 
             foreach (PropertyInfo property in instanceProperties)
             {
-                Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
+                ColumnAttribute columnAttribute = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
 
-                if (columnAttributes.Length == 0) //change this code (deal with names and attribute existence)
+                if (columnAttribute != null)
                 {
-                    string columnName = property.Name;
-                    columnNames.Add(columnName);
-                }
-                else
-                {
-                    ColumnAttribute columnAttribute = (ColumnAttribute)columnAttributes[0];
-                    columnNames.Add(columnAttribute._columnName);
+                    if (columnAttribute._columnName == null)
+                    {
+                        string columnName = property.Name;
+                        columnNames.Add(columnName);
+                    }
+                    else
+                    {
+                        columnNames.Add(columnAttribute._columnName);
+                    }
                 }
             }
 
             return columnNames;
-        }
-
-        public List<Tuple<string, Object>> GetAssociationTable(Object instance1, Object instance2)
-        {
-            string columnName1 = "", columnName2 = "";
-            PropertyInfo foreignKeyProperty1 = FindPrimaryKeyProperty(instance1);
-            PropertyInfo foreignKeyProperty2 = FindPrimaryKeyProperty(instance2);
-
-            ColumnAttribute columnAttribute1 = (ColumnAttribute)foreignKeyProperty1.GetCustomAttribute(typeof(ColumnAttribute), false);
-            ColumnAttribute columnAttribute2 = (ColumnAttribute)foreignKeyProperty2.GetCustomAttribute(typeof(ColumnAttribute), false);
-
-            if (columnAttribute1 != null || columnAttribute2 != null)
-            {
-
-                if (columnAttribute1 != null)
-                {
-                    if (columnAttribute1._columnName == null)
-                    {
-                        columnName1 = foreignKeyProperty1.Name;
-                    }
-                    else
-                    {
-                        columnName1 = columnAttribute1._columnName;
-                    }
-                }
-
-                if (columnAttribute2 != null)
-                {
-                    if (columnAttribute2._columnName == null)
-                    {
-                        columnName2 = foreignKeyProperty2.Name;
-                    }
-                    else
-                    {
-                        columnName2 = columnAttribute2._columnName;
-                    }
-                }
-
-                MethodInfo strGetter1 = foreignKeyProperty1.GetGetMethod(nonPublic: true);
-                MethodInfo strGetter2 = foreignKeyProperty2.GetGetMethod(nonPublic: true);
-
-                var value1 = strGetter1.Invoke(instance1, null);
-                var value2 = strGetter2.Invoke(instance2, null);
-
-                Tuple<string, Object> columnAndValue1 = new Tuple<string, Object>(columnName1, value1);
-                Tuple<string, Object> columnAndValue2 = new Tuple<string, Object>(columnName2, value2);
-                List<Tuple<string, Object>> foreignKeys = new List<Tuple<string, Object>> { columnAndValue1, columnAndValue2 };
-
-                return foreignKeys;
-            }
-
-            return null;
         }
 
         public List<Tuple<string, Object>> GetColumnsAndValues(Object instance)
@@ -126,6 +76,42 @@ namespace Design_Patterns_project
                     continue;
                 }
 
+                if (columnAttribute._columnName == null)
+                {
+                    columnName = property.Name;
+                }
+                else
+                {
+                    columnName = columnAttribute._columnName;
+                }
+
+                OneToOneAttribute oneToOneAttribute = (OneToOneAttribute)property.GetCustomAttribute(typeof(OneToOneAttribute), false);
+                OneToManyAttribute oneToManyAttribute = (OneToManyAttribute)property.GetCustomAttribute(typeof(OneToManyAttribute), false);
+                ManyToManyAttribute manyToManyAttribute = (ManyToManyAttribute)property.GetCustomAttribute(typeof(ManyToManyAttribute), false);
+
+                if (oneToOneAttribute == null && oneToManyAttribute == null && manyToManyAttribute == null)
+                {
+                    list.Add(new Tuple<string, Object>(columnName, value));
+                }
+            }
+
+            return list;
+        }
+
+        public List<Tuple<string, Object>> GetInheritedColumnsAndValues(List<PropertyInfo> inheritedProperties)
+        {
+            List<Tuple<string, Object>> list = new List<Tuple<string, object>>();
+
+            foreach (var property in inheritedProperties)
+            {
+                Type propertyType = property.PropertyType;
+                string columnName;
+                ColumnAttribute columnAttribute = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
+
+                if (columnAttribute == null)
+                {
+                    continue;
+                }
 
                 if (columnAttribute._columnName == null)
                 {
@@ -140,10 +126,9 @@ namespace Design_Patterns_project
                 OneToManyAttribute oneToManyAttribute = (OneToManyAttribute)property.GetCustomAttribute(typeof(OneToManyAttribute), false);
                 ManyToManyAttribute manyToManyAttribute = (ManyToManyAttribute)property.GetCustomAttribute(typeof(ManyToManyAttribute), false);
 
-                //foreign key mapping and association table mapping will solve this problem
                 if (oneToOneAttribute == null && oneToManyAttribute == null && manyToManyAttribute == null)
                 {
-                    list.Add(new Tuple<string, Object>(columnName, value));
+                    list.Add(new Tuple<string, Object>(columnName, propertyType));
                 }
             }
 
@@ -170,23 +155,6 @@ namespace Design_Patterns_project
 
             return null;
         }
-        public PropertyInfo FindPrimaryKeyProperty(Object instance)
-        {
-            Type instanceType = instance.GetType();
-            PropertyInfo[] properties = GetTypeProperties(instanceType);
-
-            foreach (PropertyInfo property in properties)
-            {
-                PKeyAttribute attribute = (PKeyAttribute)property.GetCustomAttribute(typeof(PKeyAttribute), false);
-
-                if (attribute != null)
-                {
-                    return property;
-                }
-            }
-
-            return null;
-        }
 
         public string FindPrimaryKeyFieldName(Object instance)
         {
@@ -195,13 +163,12 @@ namespace Design_Patterns_project
             
             foreach (PropertyInfo property in properties)
             {
-                Object[] pKeyAttributes = property.GetCustomAttributes(typeof(PKeyAttribute), false);
+                Object pKeyAttribute = (PKeyAttribute)property.GetCustomAttribute(typeof(PKeyAttribute), false);
 
-                if (pKeyAttributes.Length != 0)
+                if (pKeyAttribute != null)
                 {
                     string columnName;
-                    Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
-                    ColumnAttribute columnAttribute = (ColumnAttribute)columnAttributes[0];
+                    ColumnAttribute columnAttribute = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
 
                     if (columnAttribute._columnName == null)
                     {

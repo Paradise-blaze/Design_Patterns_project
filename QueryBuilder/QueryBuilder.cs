@@ -41,7 +41,7 @@ namespace Design_Patterns_project.SqlCommands
             return returnQuery;
         }
 
-        public static readonly Dictionary<Type, string> CsTypesToSql = new Dictionary<Type, string>()
+        public static readonly Dictionary<Object, string> CsTypesToSql = new Dictionary<Object, string>()
         {
             {typeof(System.Int64),"bigint"},
             {typeof(System.Byte[]),"binary"},
@@ -54,39 +54,46 @@ namespace Design_Patterns_project.SqlCommands
             {typeof(System.Int32),"int" },
         };
 
-        public string CreateCreateTableQuery(string tableName, List<Tuple<string, object>> columns, object primaryKey, Dictionary<string, string> tablesAndForeignKeys = null)
+        public string CreateCreateTableQuery(string tableName, List<Tuple<string, Object>> columnsAndValues, string primaryKey, Dictionary<string, Tuple<string, Object>> tablesAndForeignKeys = null)
         {
             string returnQuery = "IF NOT EXISTS ( SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo." + tableName + "') and TYPE in (N'U')) BEGIN";
             returnQuery += " CREATE TABLE " + tableName + "(";
 
-            if (columns != null)
+            if (columnsAndValues != null)
             {
-                foreach (Tuple<string, object> it in columns)
+                foreach (Tuple<string, Object> it in columnsAndValues)
                 {
                     returnQuery += it.Item1 + " ";
-                    returnQuery += CsTypesToSql[it.Item2.GetType()];
+
+                    if (CsTypesToSql.ContainsKey(it.Item2))
+                    {
+                        returnQuery += CsTypesToSql[it.Item2];
+                    }
+                    else
+                    {
+                        returnQuery += CsTypesToSql[it.Item2.GetType()];
+                    }
+
                     if (primaryKey.Equals(it.Item1))
                     {
                         returnQuery += " PRIMARY KEY,   ";
                     }
                     else
+                    {
                         returnQuery += ", ";
+                    }
                 }
             }
             
-
-            
-
-            // change INT into proper PK type
             if (tablesAndForeignKeys != null)
             {
                 foreach (var pair in tablesAndForeignKeys)
                 {
-                    returnQuery += pair.Key + pair.Value + " INT FOREIGN KEY REFERENCES " + pair.Key + "(" + pair.Value + ") ,"; // manyTomany
+                    returnQuery += pair.Key + pair.Value.Item1 + " " + CsTypesToSql[pair.Value.Item2.GetType()] + " FOREIGN KEY REFERENCES " + pair.Key + "(" + pair.Value.Item1 + ") ,";
                 }
             }
-            returnQuery = returnQuery.Remove(returnQuery.Length - 2);
 
+            returnQuery = returnQuery.Remove(returnQuery.Length - 2);
             returnQuery += ") END;";
 
             return returnQuery;
