@@ -31,8 +31,10 @@ namespace Design_Patterns_project.SqlCommands
                         returnQuery += "'" + it.Item2 + "'" + ", ";
                 }
                 else
-                {
-                    returnQuery += it.Item2 + ", ";
+                {   
+                    
+                    string value = it.Item2.ToString().Replace(",",".");
+                    returnQuery += value + ", ";
                 }
             }
             returnQuery = returnQuery.Remove(returnQuery.Length - 2);

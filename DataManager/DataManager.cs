@@ -147,8 +147,96 @@ namespace Design_Patterns_project
             
         }
 
-        public void Insert()
+        public void Insert(Object obj, Tuple<string,object> parentKey = null)
         {
+            string tableName = _dataMapper.GetTableName(obj.GetType());
+            List<Tuple<string, object>> columnsAndValuesList = _dataMapper.GetColumnsAndValues(obj);
+
+
+            object primaryKey = _dataMapper.FindPrimaryKey(obj); 
+            object primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj);
+            
+            // relationships lists
+            List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(obj);
+            List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(obj);
+            List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(obj);
+
+            QueryBuilder query = new QueryBuilder();
+            string insertQuery;
+
+            if (parentKey != null){
+                columnsAndValuesList.Add(parentKey);
+                insertQuery = query.CreateInsertQuery(tableName,columnsAndValuesList);
+            }else{
+                insertQuery = query.CreateInsertQuery(tableName,columnsAndValuesList);
+            }
+            
+
+            _msSqlConnection.ConnectAndOpen();
+            _msSqlConnection.ExecuteQuery(insertQuery);
+            _msSqlConnection.Dispose();
+
+
+            if(oneToOne.Count != 0){
+                foreach (var relation in oneToOne)
+                {
+                    PropertyInfo propertyObj = relation._secondMember;
+                    MethodInfo getter = propertyObj.GetGetMethod(nonPublic: true);
+                    Object secondMemberObject = getter.Invoke(obj, null);
+                    Tuple<string,object> parentKeyTuple = new Tuple<string,object>( tableName+(string)primaryKeyName, primaryKey);
+                    
+                    Insert(secondMemberObject, parentKeyTuple);
+                }
+            }
+
+            if(oneToMany.Count != 0){
+                foreach (var relation in oneToMany)
+                {
+                    PropertyInfo propertyObj = relation._secondMember;
+                    MethodInfo getter = propertyObj.GetGetMethod(nonPublic: true);
+                    Object secondMemberObject = getter.Invoke(obj, null);
+                    IList secondMemberObjectList = secondMemberObject as IList;
+
+                    foreach (var item in secondMemberObjectList)
+                    {
+                        Tuple<string,object> parentKeyTuple = new Tuple<string,object>( tableName+(string)primaryKeyName, primaryKey);
+                        Insert(item,parentKeyTuple);
+                    }
+                }
+            }
+
+            if(manyToMany.Count != 0){
+                foreach (var relation in manyToMany)
+                {
+
+                    PropertyInfo propertyObj = relation._secondMember;
+                    MethodInfo getter = propertyObj.GetGetMethod(nonPublic: true);
+                    Object secondMemberObject = getter.Invoke(obj, null);
+                    IList secondMemberObjectList = secondMemberObject as IList;
+
+                    foreach (var item in secondMemberObjectList)
+                    {
+                        Object secondMemberKey = _dataMapper.FindPrimaryKey(item);
+                        Object secondMemberKeyName = _dataMapper.FindPrimaryKeyFieldName(item);
+                        string secondMemberTableName = _dataMapper.GetTableName(item.GetType());
+
+                        Insert(item);
+
+                        Tuple<string,object> oneTableKey = new Tuple<string,object>(tableName+primaryKeyName,primaryKey);
+                        Tuple<string,object> secondTableKey = new Tuple<string,object>(secondMemberTableName+secondMemberKeyName,secondMemberKey);
+                        List<Tuple<string, object>> keysAndValues = new List<Tuple<string, object>>{oneTableKey,secondTableKey};
+
+                        string associationTableName = GetMergedNames((string)tableName, (string)secondMemberTableName);
+                        
+                        string intoAssocTableInsertQuery = query.CreateInsertQuery(associationTableName,keysAndValues);
+
+                        _msSqlConnection.ConnectAndOpen();
+                        _msSqlConnection.ExecuteQuery(intoAssocTableInsertQuery);
+                        _msSqlConnection.Dispose();
+
+                    }
+                }
+            }
 
         }
 
