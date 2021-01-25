@@ -27,7 +27,7 @@ namespace Design_Patterns_project
 
         public void Select()
         {
-            
+
         }
 
         public void Insert()
@@ -35,9 +35,9 @@ namespace Design_Patterns_project
 
         }
 
-        public void Delete() 
-        { 
-        
+        public void Delete()
+        {
+
         }
 
         public void Update()
@@ -65,7 +65,7 @@ namespace Design_Patterns_project
                     List<FieldInfo> fieldList = _tableInheritance.InheritSingle(lastMembers);
                     Type mainType = _tableInheritance.GetMainType(lastMembers[0]);
                     CreateTable(mainType.Name, fieldList);
-                    
+
                     break;
                 case 1: //ClassInheritance
                     Dictionary<Type, List<FieldInfo>> typeMap = _tableInheritance.InheritClass(lastMembers);
