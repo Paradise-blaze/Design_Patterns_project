@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Design_Patterns_project.SqlConditions;
 
-namespace Design_Patterns_project.QueryBuilder
+namespace Design_Patterns_project.SqlCommands
 {
     class QueryBuilder
     {
@@ -43,7 +41,7 @@ namespace Design_Patterns_project.QueryBuilder
             return returnQuery;
         }
 
-        public static readonly Dictionary<Type, string> CsTypesToSql = new Dictionary<Type, string>()
+        public static readonly Dictionary<Object, string> CsTypesToSql = new Dictionary<Object, string>()
         {
             {typeof(System.Int64),"bigint"},
             {typeof(System.Byte[]),"binary"},
@@ -56,21 +54,43 @@ namespace Design_Patterns_project.QueryBuilder
             {typeof(System.Int32),"int" },
         };
 
-        public string createCreateTableQuery(string tableName, List<Tuple<string, object>> columns, object primaryKey)
+        public string CreateCreateTableQuery(string tableName, List<Tuple<string, Object>> columnsAndValues, string primaryKey, Dictionary<string, Tuple<string, Object>> tablesAndForeignKeys = null)
         {
             string returnQuery = "IF NOT EXISTS ( SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo." + tableName + "') and TYPE in (N'U')) BEGIN";
             returnQuery += " CREATE TABLE " + tableName + "(";
 
-            foreach (Tuple<string, object> it in columns)
+            if (columnsAndValues != null)
             {
-                returnQuery += it.Item1 + " ";
-                returnQuery += CsTypesToSql[it.Item2.GetType()];
-                if (primaryKey.Equals(it.Item1))
+                foreach (Tuple<string, Object> it in columnsAndValues)
                 {
-                    returnQuery += " PRIMARY KEY,   ";
+                    returnQuery += it.Item1 + " ";
+
+                    if (CsTypesToSql.ContainsKey(it.Item2))
+                    {
+                        returnQuery += CsTypesToSql[it.Item2];
+                    }
+                    else
+                    {
+                        returnQuery += CsTypesToSql[it.Item2.GetType()];
+                    }
+
+                    if (primaryKey.Equals(it.Item1))
+                    {
+                        returnQuery += " PRIMARY KEY,   ";
+                    }
+                    else
+                    {
+                        returnQuery += ", ";
+                    }
                 }
-                else
-                    returnQuery += ", ";
+            }
+            
+            if (tablesAndForeignKeys != null)
+            {
+                foreach (var pair in tablesAndForeignKeys)
+                {
+                    returnQuery += pair.Key + pair.Value.Item1 + " " + CsTypesToSql[pair.Value.Item2.GetType()] + " FOREIGN KEY REFERENCES " + pair.Key + "(" + pair.Value.Item1 + ") ,";
+                }
             }
 
             returnQuery = returnQuery.Remove(returnQuery.Length - 2);
@@ -79,7 +99,7 @@ namespace Design_Patterns_project.QueryBuilder
             return returnQuery;
         }
 
-        public string createUpdateQuery(string tableName, List<Tuple<string, object>> valuesToSet, List<SqlCondition> SqlCondition)
+        public string CreateUpdateQuery(string tableName, List<Tuple<string, object>> valuesToSet, List<SqlCondition> SqlCondition)
         {
             string returnQuery = "UPDATE " + tableName + " SET ";
             foreach (Tuple<string, object> it in valuesToSet)
@@ -95,34 +115,34 @@ namespace Design_Patterns_project.QueryBuilder
                 }
             }
             returnQuery = returnQuery.Remove(returnQuery.Length - 2);
-            returnQuery += generateWhereClause(SqlCondition);
+            returnQuery += GenerateWhereClause(SqlCondition);
             return returnQuery;
         }
 
-        public string createDeleteQuery(string tableName, List<SqlCondition> listOfSqlCondition)
+        public string CreateDeleteQuery(string tableName, List<SqlCondition> listOfSqlCondition)
         {
-            string query = "DELETE FROM " + tableName + generateWhereClause(listOfSqlCondition);
+            string query = "DELETE FROM " + tableName + GenerateWhereClause(listOfSqlCondition);
             return query;
         }
 
-        public string createSelectByIdQuery(string tableName, object id, string primaryKeyName)
+        public string CreateSelectByIdQuery(string tableName, object id, string primaryKeyName)
         {
             string result = "SELECT * FROM " + tableName + " WHERE " + tableName + "." + primaryKeyName + "=" + id + ";";
             return result;
         }
 
-        public string createSelectQuery(string tablename, List<SqlCondition> listOfSqlCondition)
+        public string CreateSelectQuery(string tablename, List<SqlCondition> listOfSqlCondition)
         {
-            string query = "SELECT * FROM " + tablename + generateWhereClause(listOfSqlCondition);
+            string query = "SELECT * FROM " + tablename + GenerateWhereClause(listOfSqlCondition);
             return query;
         }
 
-        public string generateWhereClause(List<SqlCondition> listOfSqlCondition)
+        public string GenerateWhereClause(List<SqlCondition> listOfSqlCondition)
         {
             string whereClause = " WHERE ";
             foreach (SqlCondition c in listOfSqlCondition)
             {
-                whereClause += c.generateString() + " AND ";
+                whereClause += c.GenerateString() + " AND ";
             }
             whereClause = whereClause.Remove(whereClause.Length - 5);
             whereClause += ";";
