@@ -33,8 +33,7 @@ namespace Design_Patterns_project.SqlCommands
                 else
                 {   
                     
-                    string value = it.Item2.ToString().Replace(",",".");
-                    returnQuery += value + ", ";
+                    returnQuery += it.Item2 + ", ";
                 }
             }
             returnQuery = returnQuery.Remove(returnQuery.Length - 2);
@@ -112,8 +111,10 @@ namespace Design_Patterns_project.SqlCommands
                     returnQuery += "'" + it.Item2 + "'" + ", ";
                 }
                 else
-                {
-                    returnQuery += it.Item2 + ", ";
+                {   
+                    string value = it.Item2.ToString().Replace(',','.');
+                    returnQuery += value + ", ";
+                    
                 }
             }
             returnQuery = returnQuery.Remove(returnQuery.Length - 2);
@@ -146,9 +147,10 @@ namespace Design_Patterns_project.SqlCommands
             {
                 whereClause += c.GenerateString() + " AND ";
             }
+            
             whereClause = whereClause.Remove(whereClause.Length - 5);
-            whereClause += ";";
-            return whereClause;
+            
+            return whereClause += ";";
         }
 
     }

@@ -57,9 +57,7 @@ namespace Design_Patterns_project
                 query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName, tableAndForeignKey);
             }
 
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(query);
-            _msSqlConnection.Dispose();
+            PerformQuery(query);
 
             // foreign key mapping
             List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(instance);
@@ -121,9 +119,7 @@ namespace Design_Patterns_project
         {
             string query = _queryBuilder.CreateCreateTableQuery(tableName, null, "", tablesAndForeignKeys);
 
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(query);
-            _msSqlConnection.Dispose();
+            PerformQuery(query);
         }
 
         private void CreateTable(Type objectType, List<PropertyInfo> inheritedProperties)
@@ -137,9 +133,7 @@ namespace Design_Patterns_project
                 : "";
             string query = _queryBuilder.CreateCreateTableQuery(tableName, columnsBasedOnProperties, primaryKeyName);
 
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(query);
-            _msSqlConnection.Dispose();
+            PerformQuery(query);
         }
 
         public void Select() //void temporary, need to return something
@@ -198,9 +192,7 @@ namespace Design_Patterns_project
                 insertQuery = _queryBuilder.CreateInsertQuery(tableName, columnsAndValuesList);
             }
 
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(insertQuery);
-            _msSqlConnection.Dispose();
+            PerformQuery(insertQuery);
 
             if (oneToOne.Count != 0)
             {
@@ -256,9 +248,7 @@ namespace Design_Patterns_project
                         string associationTableName = GetMergedNames((string)tableName, (string)secondMemberTableName);
                         string intoAssocTableInsertQuery = _queryBuilder.CreateInsertQuery(associationTableName, keysAndValues);
 
-                        _msSqlConnection.ConnectAndOpen();
-                        _msSqlConnection.ExecuteQuery(intoAssocTableInsertQuery);
-                        _msSqlConnection.Dispose();
+                        PerformQuery(intoAssocTableInsertQuery);
                     }
                 }
             }
@@ -297,25 +287,22 @@ namespace Design_Patterns_project
             List<SqlCondition> listOfCriteria = new List<SqlCondition> { SqlCondition.Equals(primaryKeyName, primaryKey) };
             string query = _queryBuilder.CreateDeleteQuery(tableName, listOfCriteria);
 
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(query);
-            _msSqlConnection.Dispose();
+            PerformQuery(query);
         }
 
         public void Delete(string tableName, List<SqlCondition> listOfCriteria)
         {
             String query = _queryBuilder.CreateDeleteQuery(tableName, listOfCriteria);
-
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(query);
-            _msSqlConnection.Dispose();
+            PerformQuery(query);
         }
 
         // delete table???
 
         public void Update(Type type, List<Tuple<string, object>> valuesToSet, List<SqlCondition> criterias)
         {
-
+            string tableName = _dataMapper.GetTableName(type);
+            string updateQuery = _queryBuilder.CreateUpdateQuery(tableName,valuesToSet,criterias);
+            PerformQuery(updateQuery);
         }
 
         public void Inherit(List<Object> lastMembersOfInheritanceHierarchy, int mode)
@@ -362,5 +349,22 @@ namespace Design_Patterns_project
                     throw new ArgumentException("Incorrect value", nameof(mode));
             }
         }
+
+        public void PerformQuery(string query, bool isSelect = false){
+            
+            if (isSelect){
+                _msSqlConnection.ConnectAndOpen();
+                _msSqlConnection.ExecuteSelectQuery(query);
+                _msSqlConnection.Dispose();
+
+            }else{
+                _msSqlConnection.ConnectAndOpen();
+                _msSqlConnection.ExecuteQuery(query);
+                _msSqlConnection.Dispose();
+            }
+            
+        }
+
+
     }
 }
