@@ -15,7 +15,8 @@ namespace SingleTableInheritanceTest
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "SingleTableInheritanceTest"
 
-            DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
+            //DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
+            DataManager mythicalManager = new DataManager("DESKTOP-HVUO0CP", "SingleTableInheritanceTest");
 
             IceDragon iceDragon1 = new IceDragon(1, 220, "Winter", 15, 20, 35, 50);
             IceDragon iceDragon2 = new IceDragon(8, 210, "Whiter", 19, 22, 37, 51);

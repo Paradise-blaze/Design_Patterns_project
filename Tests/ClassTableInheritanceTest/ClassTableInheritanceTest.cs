@@ -15,7 +15,8 @@ namespace ClassTableInheritanceTest
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "ClassTableInheritanceTest"
 
-            DataManager wizardManager = new DataManager("LAPTOP-BHF7G1P9", "ClassTableInheritanceTest");
+            // DataManager wizardManager = new DataManager("LAPTOP-BHF7G1P9", "TestDB");
+            DataManager wizardManager = new DataManager("DESKTOP-HVUO0CP", "TestDB");
 
             ArchMage archMage1 = new ArchMage(1, "Gandalf", 1, 2.32, 1, 106);
             ArchMage archMage2 = new ArchMage(1, "Vilgefortz", 1, 2.29, 2, 104);

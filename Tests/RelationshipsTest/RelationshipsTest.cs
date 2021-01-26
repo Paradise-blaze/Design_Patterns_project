@@ -16,7 +16,8 @@ namespace RelationshipsTest
             // szymon -> "LAPTOP-BHF7G1P9", "RelationshipsTest" databases (like tests directories)
             // Blacki7 - > "DESKTOP-BO1NL9H", "test1"  (work in progress)
 
-            DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
+            //DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
+            DataManager mountainManager = new DataManager("DESKTOP-HVUO0CP", "RelationshipsTest");
 
             Flea flea1 = new Flea(1, "Skoczuszka", 42.9);
             Flea flea2 = new Flea(2, "Sokolica", 12.19);
@@ -50,12 +51,16 @@ namespace RelationshipsTest
             testShepherd.AddAlp(alp1);
             testShepherd.AddAlp(alp2);
 
-            mountainManager.CreateTable(testShepherd);
-            mountainManager.Insert(testShepherd);
+            // mountainManager.CreateTable(testShepherd);
+            // mountainManager.Insert(testShepherd);
 
-            mountainManager.Delete(flea3);
-            List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.LowerThan("nr_owcy", 236) };
-            mountainManager.Delete("znacznik", conditions);
+            // mountainManager.Delete(flea3);
+            // List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.LowerThan("nr_owcy", 236) };
+            // mountainManager.Delete("znacznik", conditions);
+
+            List<Tuple<string, object>> valuesToSet = new List<Tuple<string, object>> {new Tuple<string,object>("jakosc_welny",1.5)};
+            List<SqlCondition> conditions = new List<SqlCondition> {SqlCondition.GreaterThan("jakosc_welny",1.25)};
+            mountainManager.Update(typeof(Sheep),valuesToSet,conditions);
 
             Console.WriteLine("Utter success");
         }
