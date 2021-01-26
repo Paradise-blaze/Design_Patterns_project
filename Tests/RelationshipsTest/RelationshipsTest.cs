@@ -16,8 +16,8 @@ namespace RelationshipsTest
             // szymon -> "LAPTOP-BHF7G1P9", "RelationshipsTest" databases (like tests directories)
             // Blacki7 - > "DESKTOP-BO1NL9H", "test1"  (work in progress)
 
-            //DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
-            DataManager mountainManager = new DataManager("DESKTOP-HVUO0CP", "RelationshipsTest");
+            DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
+            //DataManager mountainManager = new DataManager("DESKTOP-HVUO0CP", "RelationshipsTest");
 
             Flea flea1 = new Flea(1, "Skoczuszka", 42.9);
             Flea flea2 = new Flea(2, "Sokolica", 12.19);

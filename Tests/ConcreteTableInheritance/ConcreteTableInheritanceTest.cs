@@ -15,8 +15,8 @@ namespace ConcreteTableInheritanceTest
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest"
 
-            //DataManager vehicleManager = new DataManager("LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest");
-            DataManager vehicleManager = new DataManager("DESKTOP-HVUO0CP", "ConcreteTableInheritanceTest");
+            DataManager vehicleManager = new DataManager("LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest");
+            //DataManager vehicleManager = new DataManager("DESKTOP-HVUO0CP", "ConcreteTableInheritanceTest");
 
             FourWheeledVehicle car1 = new FourWheeledVehicle(1, 250.21, 8.12);
             FourWheeledVehicle car2 = new FourWheeledVehicle(2, 245.15, 7.91);
@@ -33,7 +33,7 @@ namespace ConcreteTableInheritanceTest
             Vehicle bike2 = new Vehicle(7, 48.91);
             List<Object> vehicles = new List<Object>() { car1, motorbike1 };
             vehicleManager.Inherit(vehicles, 2);
-            vehicleManager.Insert(car1);
+            /*vehicleManager.Insert(car1);
             vehicleManager.Insert(car2);
             vehicleManager.Insert(car3);
             vehicleManager.Insert(motorbike1);
@@ -49,7 +49,11 @@ namespace ConcreteTableInheritanceTest
 
             List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.GreaterThan("size", 8) };
             vehicleManager.Delete("FourWheeledVehicle", conditions);
-            vehicleManager.Delete(motorbike2);
+            vehicleManager.Delete(motorbike2);*/
+
+            List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, object>> { new Tuple<string, Object>("acceleration", 20.54) };
+            List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.LowerThan("velocity", 159.99) };
+            vehicleManager.Update(typeof(TwoWheeledVehicle), valuesToSet, updateConditions);
 
             Console.WriteLine("Utter success");
         }

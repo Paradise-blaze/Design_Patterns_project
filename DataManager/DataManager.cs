@@ -168,7 +168,7 @@ namespace Design_Patterns_project
             // single table inheritance
             else
             {
-                Type rootHierarchyType = _tableInheritance.GetMainType(obj);
+                Type rootHierarchyType = _tableInheritance.GetMainType(obj.GetType());
                 tableName = _dataMapper.GetTableName(rootHierarchyType);
                 columnsAndValuesList = _dataMapper.GetColumnsAndValues(obj, true);
                 primaryKey = _dataMapper.FindPrimaryKey(obj, true);
@@ -278,7 +278,7 @@ namespace Design_Patterns_project
             // single table inheritance
             else
             {
-                Type rootHierarchyType = _tableInheritance.GetMainType(obj);
+                Type rootHierarchyType = _tableInheritance.GetMainType(obj.GetType());
                 tableName = _dataMapper.GetTableName(rootHierarchyType);
                 primaryKey = _dataMapper.FindPrimaryKey(obj, true);
                 primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType(), true);
@@ -296,12 +296,17 @@ namespace Design_Patterns_project
             PerformQuery(query);
         }
 
-        // delete table???
-
-        public void Update(Type type, List<Tuple<string, object>> valuesToSet, List<SqlCondition> criterias)
+        public void Update(Type type, List<Tuple<string, object>> valuesToSet, List<SqlCondition> conditions)
         {
             string tableName = _dataMapper.GetTableName(type);
-            string updateQuery = _queryBuilder.CreateUpdateQuery(tableName,valuesToSet,criterias);
+
+            if (!_msSqlConnection.CheckIfTableExists(tableName))
+            {
+                Type rootHierarchyType = _tableInheritance.GetMainType(type);
+                tableName = _dataMapper.GetTableName(rootHierarchyType);
+            }
+
+            string updateQuery = _queryBuilder.CreateUpdateQuery(tableName,valuesToSet, conditions);
             PerformQuery(updateQuery);
         }
 
@@ -323,7 +328,7 @@ namespace Design_Patterns_project
             {
                 case 0: //SingleInheritance
                     List<PropertyInfo> memberList = _tableInheritance.InheritSingle(lastMembersOfInheritanceHierarchy);
-                    Type mainType = _tableInheritance.GetMainType(lastMembersOfInheritanceHierarchy[0]);
+                    Type mainType = _tableInheritance.GetMainType((lastMembersOfInheritanceHierarchy[0]).GetType());
                     CreateTable(mainType, memberList);
 
                     break;
