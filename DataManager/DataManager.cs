@@ -142,9 +142,47 @@ namespace Design_Patterns_project
             _msSqlConnection.Dispose();
         }
 
-        public void Select() //void temporary, need to return something
+        public string Select(Object obj, List<SqlCondition> listOfSqlCondition, Tuple<string,object> parentKey = null) //void temporary, need to return something
         {
-            
+            string tableName = _dataMapper.GetTableName(obj.GetType());
+            object primaryKey;
+            object primaryKeyName;
+
+            if (_msSqlConnection.CheckIfTableExists(tableName))
+            {
+                // concrete table inheritance
+                if ((_msSqlConnection.GetColumnNamesFromTable(tableName)).Count == (DataMapper.GetTypeAllProperties(obj.GetType())).Length)
+                {
+                    primaryKey = _dataMapper.FindPrimaryKey(obj, true);
+                    primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType(), true);
+                }
+                // class table inheritance or normal insert on single class
+                else
+                {
+                    primaryKey = _dataMapper.FindPrimaryKey(obj);
+                    primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType());
+                }
+            }
+            // single table inheritance
+            else
+            {
+                Type rootHierarchyType = _tableInheritance.GetMainType(obj);
+                tableName = _dataMapper.GetTableName(rootHierarchyType);
+                primaryKey = _dataMapper.FindPrimaryKey(obj, true);
+                primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType(), true);
+            }
+
+
+            string selectQuery;
+
+            selectQuery = _queryBuilder.CreateSelectQuery(tableName, listOfSqlCondition);
+
+            _msSqlConnection.ConnectAndOpen();
+            String selectQueryOutput = _msSqlConnection.ExecuteSelectQuery(selectQuery);
+            _msSqlConnection.Dispose();
+
+        return selectQueryOutput;
+
         }
 
         public void Insert(Object obj, Tuple<string,object> parentKey = null)
