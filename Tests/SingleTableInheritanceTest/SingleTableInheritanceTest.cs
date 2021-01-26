@@ -16,22 +16,40 @@ namespace SingleTableInheritanceTest
             // szymon -> "LAPTOP-BHF7G1P9", "SingleTableInheritanceTest"
 
             DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
+            //DataManager mythicalManager = new DataManager("DESKTOP-HVUO0CP", "SingleTableInheritanceTest");
 
-            IceDragon iceDragon = new IceDragon(1, 200, "Winter", 15, 20, 35, 50);
-            GoldDragon goldDragon = new GoldDragon(2, 220, "Smaug", 10, 20, 40, 40);
-            Dragon dragon = new Dragon(3, 160, "Cracow Dragon", 7, 8);
+            IceDragon iceDragon1 = new IceDragon(1, 220, "Winter", 15, 20, 35, 50);
+            IceDragon iceDragon2 = new IceDragon(8, 210, "Whiter", 19, 22, 37, 51);
+            IceDragon iceDragon3 = new IceDragon(9, 200, "Freezer", 14, 23, 31, 46);
+            GoldDragon goldDragon1 = new GoldDragon(2, 220, "Smaug", 10, 20, 40, 40);
+            GoldDragon goldDragon2 = new GoldDragon(10, 250, "Villentretenmerth", 19, 25, 45, 55);
+            Dragon dragon1 = new Dragon(3, 160, "Cracow Dragon", 12, 8);
+            Dragon dragon2 = new Dragon(7, 150, "English Dragon", 5, 10);
             MythicalCreature mythicalCreature1 = new MythicalCreature(4, 50, "Dwarf");
             MythicalCreature mythicalCreature2 = new MythicalCreature(5, 15, "Goblin");
             MythicalCreature mythicalCreature3 = new MythicalCreature(6, 40, "Orc");
-            List<Object> creatures = new List<Object>() { iceDragon, goldDragon };
+            List<Object> creatures = new List<Object>() { iceDragon1, goldDragon1 };
 
             mythicalManager.Inherit(creatures, 0);
-            mythicalManager.Insert(dragon);
-            mythicalManager.Insert(iceDragon);
-            mythicalManager.Insert(goldDragon);
+
+           /* mythicalManager.Insert(dragon1);
+            mythicalManager.Insert(dragon2);
+            mythicalManager.Insert(iceDragon1);
+            mythicalManager.Insert(iceDragon2);
+            mythicalManager.Insert(iceDragon3);
+            mythicalManager.Insert(goldDragon1);
+            mythicalManager.Insert(goldDragon2);
             mythicalManager.Insert(mythicalCreature1);
             mythicalManager.Insert(mythicalCreature2);
             mythicalManager.Insert(mythicalCreature3);
+
+            List<SqlCondition> deleteConditions = new List<SqlCondition> { SqlCondition.LowerThan("blast_power", 11) };
+            mythicalManager.Delete("MythicalCreature", deleteConditions);
+            mythicalManager.Delete(dragon1);*/
+
+            List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, Object>> { new Tuple<string, Object>("endurance", 10) };
+            List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.LowerThan("health", 100) };
+            mythicalManager.Update(typeof(MythicalCreature), valuesToSet, updateConditions);
 
             Console.WriteLine("Utter success");
         }

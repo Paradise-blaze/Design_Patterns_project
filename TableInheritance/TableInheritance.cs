@@ -13,9 +13,9 @@ namespace Design_Patterns_project
         - InheritConcrete
         */
 
-        public Type GetMainType(Object instance)
+        public Type GetMainType(Type type)
         {
-            Type currentType = instance.GetType();
+            Type currentType = type;
 
             while (currentType.BaseType != typeof(Object))
             {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Design_Patterns_project.SqlCommands
+namespace Design_Patterns_project
 {
     public class SqlCondition
     {
@@ -21,8 +21,8 @@ namespace Design_Patterns_project.SqlCommands
             {
                 return _field + _sqlOperator + '"' + _value + '"';
             }
-
-            return _field + _sqlOperator + _value.ToString();
+            string finalString = _field + _sqlOperator + _value.ToString();
+            return finalString.ToString().Replace(",",".");
         }
 
         public static SqlCondition GreaterThan(string fieldName, Object value)

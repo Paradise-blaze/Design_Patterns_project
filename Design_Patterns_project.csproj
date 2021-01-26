@@ -4,7 +4,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <!-- <StartupObject>ConcreteTableInheritanceTest.ConcreteTableInheritanceTest</StartupObject> -->
-    <StartupObject>ClassTableInheritanceTest.ClassTableInheritanceTest</StartupObject>
+    <!-- <StartupObject>SingleTableInheritanceTest.SingleTableInheritanceTest</StartupObject> -->
+    <StartupObject>ConcreteTableInheritanceTest.ConcreteTableInheritanceTest</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

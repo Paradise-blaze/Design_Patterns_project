@@ -11,7 +11,7 @@ namespace Design_Patterns_project.Relationships
         {
             List<Relationship> oneToOneRelationships = new List<Relationship>();
             PropertyInfo[] propertiesArray = DataMapper.GetTypeProperties(instance.GetType());
-            
+
             Type attr = kind switch
             {
                 RelationshipKind.OneToOne => typeof(OneToOneAttribute),
@@ -25,7 +25,7 @@ namespace Design_Patterns_project.Relationships
                 Object[] attributes = property.GetCustomAttributes(attr, false);
 
                 if (attributes.Length != 0)
-                {                    
+                {
                     Relationship oneToOneRelationship = new Relationship(instance, property, kind);
                     oneToOneRelationships.Add(oneToOneRelationship);
                 }
@@ -33,18 +33,18 @@ namespace Design_Patterns_project.Relationships
 
             return oneToOneRelationships;
         }
-        public List<Relationship> FindOneToOne(Object instance) 
+        public List<Relationship> FindOneToOne(Object instance)
         {
             return FindRelationship(instance, RelationshipKind.OneToOne);
         }
 
-        public List<Relationship> FindOneToMany(Object instance) 
+        public List<Relationship> FindOneToMany(Object instance)
         {
             return FindRelationship(instance, RelationshipKind.OneToMany);
         }
 
         public List<Relationship> FindManyToMany(Object instance)
-        { 
+        {
             return FindRelationship(instance, RelationshipKind.ManyToMany);
         }
     }

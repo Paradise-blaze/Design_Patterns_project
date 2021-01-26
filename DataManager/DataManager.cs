@@ -52,15 +52,13 @@ namespace Design_Patterns_project
             else
             {
                 Object foreignKey = _dataMapper.FindPrimaryKey(instance);
-                Dictionary<string, Tuple<string, Object>> tableAndForeignKey = new Dictionary<string, Tuple<string, Object>> 
+                Dictionary<string, Tuple<string, Object>> tableAndForeignKey = new Dictionary<string, Tuple<string, Object>>
                 { {parentTableName, new Tuple<string, Object> (foreignKeyName, foreignKey)} };
                 query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, primaryKeyName, tableAndForeignKey);
             }
-            
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(query);
-            _msSqlConnection.Dispose();
-            
+
+            PerformQuery(query);
+
             // foreign key mapping
             List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(instance);
             List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(instance);
@@ -100,17 +98,17 @@ namespace Design_Patterns_project
                     var values = strGetter.Invoke(instance, null);
                     IList valueList = values as IList;
                     var secondInstance = valueList[0];
-                    
+
                     string memberTableName = _dataMapper.GetTableName(secondInstance.GetType());
                     string memberTableKeyName = _dataMapper.FindPrimaryKeyFieldName(secondInstance.GetType());
                     string mergedTablesName = GetMergedNames(tableName, memberTableName);
                     Object firstPrimaryKey = _dataMapper.FindPrimaryKey(instance);
                     Object secondPrimaryKey = _dataMapper.FindPrimaryKey(secondInstance);
 
-                    Dictionary<string, Tuple<string, Object>> tablesAndForeignKeys = new Dictionary<string, Tuple<string, Object>> { 
-                        { tableName, new Tuple<string, Object>(primaryKeyName, firstPrimaryKey) }, 
+                    Dictionary<string, Tuple<string, Object>> tablesAndForeignKeys = new Dictionary<string, Tuple<string, Object>> {
+                        { tableName, new Tuple<string, Object>(primaryKeyName, firstPrimaryKey) },
                         { memberTableName, new Tuple<string, Object> (memberTableKeyName, secondPrimaryKey) } };
-                    
+
                     CreateTable(secondInstance);
                     CreateAssociationTable(mergedTablesName, tablesAndForeignKeys);
                 }
@@ -120,10 +118,8 @@ namespace Design_Patterns_project
         private void CreateAssociationTable(string tableName, Dictionary<string, Tuple<string, Object>> tablesAndForeignKeys)
         {
             string query = _queryBuilder.CreateCreateTableQuery(tableName, null, "", tablesAndForeignKeys);
-            
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(query);
-            _msSqlConnection.Dispose();
+
+            PerformQuery(query);
         }
 
         private void CreateTable(Type objectType, List<PropertyInfo> inheritedProperties)
@@ -132,14 +128,12 @@ namespace Design_Patterns_project
             string tableName = _dataMapper.GetTableName(objectType);
 
             PropertyInfo primaryProperty = inheritedProperties.Find(x => x.GetCustomAttribute(typeof(PKeyAttribute), false) != null);
-            string primaryKeyName = primaryProperty != null ? 
-                (((ColumnAttribute)primaryProperty.GetCustomAttribute(typeof(ColumnAttribute), false))._columnName ?? primaryProperty.Name) 
+            string primaryKeyName = primaryProperty != null ?
+                (((ColumnAttribute)primaryProperty.GetCustomAttribute(typeof(ColumnAttribute), false))._columnName ?? primaryProperty.Name)
                 : "";
             string query = _queryBuilder.CreateCreateTableQuery(tableName, columnsBasedOnProperties, primaryKeyName);
 
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(query);
-            _msSqlConnection.Dispose();
+            PerformQuery(query);
         }
 
         public string Select(Object obj, List<SqlCondition> listOfSqlCondition, Tuple<string,object> parentKey = null) //void temporary, need to return something
@@ -182,13 +176,12 @@ namespace Design_Patterns_project
             _msSqlConnection.Dispose();
 
         return selectQueryOutput;
-
         }
 
-        public void Insert(Object obj, Tuple<string,object> parentKey = null)
+        public void Insert(Object obj, Tuple<string, object> parentKey = null)
         {
             string tableName = _dataMapper.GetTableName(obj.GetType());
-            List<Tuple<string, object>> columnsAndValuesList;         
+            List<Tuple<string, object>> columnsAndValuesList;
             object primaryKey;
             object primaryKeyName;
 
@@ -212,7 +205,7 @@ namespace Design_Patterns_project
             // single table inheritance
             else
             {
-                Type rootHierarchyType = _tableInheritance.GetMainType(obj);
+                Type rootHierarchyType = _tableInheritance.GetMainType(obj.GetType());
                 tableName = _dataMapper.GetTableName(rootHierarchyType);
                 columnsAndValuesList = _dataMapper.GetColumnsAndValues(obj, true);
                 primaryKey = _dataMapper.FindPrimaryKey(obj, true);
@@ -224,22 +217,19 @@ namespace Design_Patterns_project
             List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(obj);
             List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(obj);
 
-            QueryBuilder query = new QueryBuilder();
             string insertQuery;
 
             if (parentKey != null)
             {
                 columnsAndValuesList.Add(parentKey);
-                insertQuery = query.CreateInsertQuery(tableName, columnsAndValuesList);
+                insertQuery = _queryBuilder.CreateInsertQuery(tableName, columnsAndValuesList);
             }
             else
             {
-                insertQuery = query.CreateInsertQuery(tableName, columnsAndValuesList);
+                insertQuery = _queryBuilder.CreateInsertQuery(tableName, columnsAndValuesList);
             }
 
-            _msSqlConnection.ConnectAndOpen();
-            _msSqlConnection.ExecuteQuery(insertQuery);
-            _msSqlConnection.Dispose();
+            PerformQuery(insertQuery);
 
             if (oneToOne.Count != 0)
             {
@@ -293,24 +283,68 @@ namespace Design_Patterns_project
                         List<Tuple<string, object>> keysAndValues = new List<Tuple<string, object>> { oneTableKey, secondTableKey };
 
                         string associationTableName = GetMergedNames((string)tableName, (string)secondMemberTableName);
-                        string intoAssocTableInsertQuery = query.CreateInsertQuery(associationTableName, keysAndValues);
+                        string intoAssocTableInsertQuery = _queryBuilder.CreateInsertQuery(associationTableName, keysAndValues);
 
-                        _msSqlConnection.ConnectAndOpen();
-                        _msSqlConnection.ExecuteQuery(intoAssocTableInsertQuery);
-                        _msSqlConnection.Dispose();
+                        PerformQuery(intoAssocTableInsertQuery);
                     }
                 }
             }
         }
 
-        public void Delete() 
-        { 
-        
+        public void Delete(Object obj)
+        {
+            string primaryKeyName;
+            Object primaryKey;
+            string tableName = _dataMapper.GetTableName(obj.GetType());
+
+            if (_msSqlConnection.CheckIfTableExists(tableName))
+            {
+                // concrete table inheritance
+                if ((_msSqlConnection.GetColumnNamesFromTable(tableName)).Count == (DataMapper.GetTypeAllProperties(obj.GetType())).Length)
+                {
+                    primaryKey = _dataMapper.FindPrimaryKey(obj, true);
+                    primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType(), true);
+                }
+                // class table inheritance or normal insert on single class
+                else
+                {
+                    primaryKey = _dataMapper.FindPrimaryKey(obj);
+                    primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType());
+                }
+            }
+            // single table inheritance
+            else
+            {
+                Type rootHierarchyType = _tableInheritance.GetMainType(obj.GetType());
+                tableName = _dataMapper.GetTableName(rootHierarchyType);
+                primaryKey = _dataMapper.FindPrimaryKey(obj, true);
+                primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType(), true);
+            }
+
+            List<SqlCondition> listOfCriteria = new List<SqlCondition> { SqlCondition.Equals(primaryKeyName, primaryKey) };
+            string query = _queryBuilder.CreateDeleteQuery(tableName, listOfCriteria);
+
+            PerformQuery(query);
         }
 
-        public void Update()
+        public void Delete(string tableName, List<SqlCondition> listOfCriteria)
         {
+            String query = _queryBuilder.CreateDeleteQuery(tableName, listOfCriteria);
+            PerformQuery(query);
+        }
 
+        public void Update(Type type, List<Tuple<string, object>> valuesToSet, List<SqlCondition> conditions)
+        {
+            string tableName = _dataMapper.GetTableName(type);
+
+            if (!_msSqlConnection.CheckIfTableExists(tableName))
+            {
+                Type rootHierarchyType = _tableInheritance.GetMainType(type);
+                tableName = _dataMapper.GetTableName(rootHierarchyType);
+            }
+
+            string updateQuery = _queryBuilder.CreateUpdateQuery(tableName,valuesToSet, conditions);
+            PerformQuery(updateQuery);
         }
 
         public void Inherit(List<Object> lastMembersOfInheritanceHierarchy, int mode)
@@ -331,9 +365,9 @@ namespace Design_Patterns_project
             {
                 case 0: //SingleInheritance
                     List<PropertyInfo> memberList = _tableInheritance.InheritSingle(lastMembersOfInheritanceHierarchy);
-                    Type mainType = _tableInheritance.GetMainType(lastMembersOfInheritanceHierarchy[0]);
+                    Type mainType = _tableInheritance.GetMainType((lastMembersOfInheritanceHierarchy[0]).GetType());
                     CreateTable(mainType, memberList);
-                    
+
                     break;
                 case 1: //ClassInheritance
                     Dictionary<Type, List<PropertyInfo>> typeMap = _tableInheritance.InheritClass(lastMembersOfInheritanceHierarchy);
@@ -357,5 +391,22 @@ namespace Design_Patterns_project
                     throw new ArgumentException("Incorrect value", nameof(mode));
             }
         }
+
+        public void PerformQuery(string query, bool isSelect = false){
+            
+            if (isSelect){
+                _msSqlConnection.ConnectAndOpen();
+                _msSqlConnection.ExecuteSelectQuery(query);
+                _msSqlConnection.Dispose();
+
+            }else{
+                _msSqlConnection.ConnectAndOpen();
+                _msSqlConnection.ExecuteQuery(query);
+                _msSqlConnection.Dispose();
+            }
+            
+        }
+
+
     }
 }
