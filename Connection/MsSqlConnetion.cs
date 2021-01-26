@@ -3,7 +3,7 @@ using System.Text;
 using System.Data;
 using System.Data.SqlClient;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace Design_Patterns_project.Connection
 {
@@ -44,10 +44,9 @@ namespace Design_Patterns_project.Connection
         
 
         public void Dispose()
-        {
+    {
             this._connection.Close();
             this._connection.Dispose();
-            
         }
         private string ReadSingleRow(IDataRecord record, int colsAmount, int colWidht)
         {   
@@ -65,16 +64,21 @@ namespace Design_Patterns_project.Connection
         }
 
         // SELECT
-        public string ExecuteSelectQuery(string sqlQuery){
-
+        public string ExecuteSelectQuery(string sqlQuery, string tableName){
+            ConnectAndOpen();
             SqlCommand command = new SqlCommand(sqlQuery,this._connection);
+            Dispose();
+            List<string> columnNames = GetColumnNamesFromTable(tableName);
+            int maxLength = columnNames.Max(x => x.Length);
 
-            try{
+            try
+            {
+                ConnectAndOpen();
                 SqlDataReader dataReader = command.ExecuteReader();
 
-                string output = "";
+                string output = tableName + '\n';
                 int colsAmount = dataReader.FieldCount;
-                int colWidht = 12;
+                int colWidht = maxLength;
     
                 // add header
                 for(int i=0; i<colsAmount; i++){
@@ -95,6 +99,7 @@ namespace Design_Patterns_project.Connection
                     output += ReadSingleRow((IDataRecord)dataReader,colsAmount,colWidht);
                 }
                 dataReader.Close();
+                Dispose();
 
                 return output;
 

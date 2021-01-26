@@ -32,8 +32,12 @@ namespace ConcreteTableInheritanceTest
             Vehicle bike1 = new Vehicle(6, 51.66);
             Vehicle bike2 = new Vehicle(7, 48.91);
             List<Object> vehicles = new List<Object>() { car1, motorbike1 };
+
+            //create and inherit
             vehicleManager.Inherit(vehicles, 2);
-            /*vehicleManager.Insert(car1);
+
+            //insert
+            vehicleManager.Insert(car1);
             vehicleManager.Insert(car2);
             vehicleManager.Insert(car3);
             vehicleManager.Insert(motorbike1);
@@ -47,13 +51,28 @@ namespace ConcreteTableInheritanceTest
             vehicleManager.Insert(bike1);
             vehicleManager.Insert(bike2);
 
+            //select
+            List<SqlCondition> selectConditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
+            string select = vehicleManager.Select(typeof(TwoWheeledVehicle), selectConditions);
+            Console.WriteLine('\n' + select + '\n');
+
+            //delete
             List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.GreaterThan("size", 8) };
             vehicleManager.Delete("FourWheeledVehicle", conditions);
-            vehicleManager.Delete(motorbike2);*/
+            vehicleManager.Delete(motorbike2);
 
+            //select
+            select = vehicleManager.Select(typeof(TwoWheeledVehicle), selectConditions);
+            Console.WriteLine('\n' + select + '\n');
+
+            //update
             List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, object>> { new Tuple<string, Object>("acceleration", 20.54) };
             List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.LowerThan("velocity", 159.99) };
             vehicleManager.Update(typeof(TwoWheeledVehicle), valuesToSet, updateConditions);
+
+            //select
+            select = vehicleManager.Select(typeof(TwoWheeledVehicle), selectConditions);
+            Console.WriteLine('\n' + select + '\n');
 
             Console.WriteLine("Utter success");
         }
