@@ -88,7 +88,7 @@ namespace Design_Patterns_project
             {
                 properties = GetTypeProperties(instanceType);
             }
-            
+
             foreach (PropertyInfo property in properties)
             {
                 MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
@@ -259,7 +259,7 @@ namespace Design_Patterns_project
             {
                 string columnNameInObject;
                 ColumnAttribute columnAttribute = (ColumnAttribute)columnAttributes[0];
-                
+
                 if (columnAttribute._columnName == null)
                 {
                     columnNameInObject = property.Name;

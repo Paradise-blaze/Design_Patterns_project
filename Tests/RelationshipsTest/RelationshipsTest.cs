@@ -13,15 +13,16 @@ namespace RelationshipsTest
 
             // local 
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
-            // szymon -> "LAPTOP-BHF7G1P9", "RelationshipsTest"
+            // szymon -> "LAPTOP-BHF7G1P9", "Test" databases (like tests directories)
+            // Blacki7 - > "DESKTOP-BO1NL9H", "test1"  (work in progress)
 
-            DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
+            DataManager mountainManager = new DataManager("den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_");
 
             Flea flea1 = new Flea(1, "Skoczuszka", 42.9);
             Flea flea2 = new Flea(2, "Sokolica", 12.19);
             Flea flea3 = new Flea(3, "Perelka", 42.93);
 
-            Bowl bowl = new Bowl(1,"DogFood", 10);
+            Bowl bowl = new Bowl(1, "DogFood", 10);
 
             Dog testDog = new Dog(1, "Burek", 6, bowl);
 
@@ -29,9 +30,9 @@ namespace RelationshipsTest
             testDog.AddFlea(flea2);
             testDog.AddFlea(flea3);
 
-            Label label1 = new Label(1,234);
-            Label label2 = new Label(2,235);
-            Label label3 = new Label(3,236);
+            Label label1 = new Label(1, 234);
+            Label label2 = new Label(2, 235);
+            Label label3 = new Label(3, 236);
 
             Sheep sheep1 = new Sheep(1, "Marcysia", 2.35, label1);
             Sheep sheep2 = new Sheep(2, "Pola", 1.84, label2);
@@ -39,7 +40,7 @@ namespace RelationshipsTest
 
             Alp alp1 = new Alp(1, "Rozlegla dolina", 5.61);
             Alp alp2 = new Alp(2, "Gorska tajemnica", 7.42);
-            
+
             Shepherd testShepherd = new Shepherd(1, "Franek", testDog);
 
             testShepherd.AddSheep(sheep1);
@@ -127,7 +128,8 @@ namespace RelationshipsTest
     }
 
     [Table("pchla")]
-    class Flea{
+    class Flea
+    {
 
         [PKey()]
         [Column("identyfikator")]
@@ -198,7 +200,8 @@ namespace RelationshipsTest
     }
 
     [Table("znacznik")]
-    class Label{
+    class Label
+    {
 
         [PKey()]
         [Column("identyfikator")]
