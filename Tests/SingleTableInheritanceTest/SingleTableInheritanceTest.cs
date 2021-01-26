@@ -13,15 +13,25 @@ namespace SingleTableInheritanceTest
 
             // local 
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
-            // szymon -> "LAPTOP-BHF7G1P9", "Test" databases (like tests directories)
+            // szymon -> "LAPTOP-BHF7G1P9", "SingleTableInheritanceTest"
 
             DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
 
-            IceDragon iceDragon = new IceDragon(200, "Winter", 15, 20, 35, 50);
-            GoldDragon goldDragon = new GoldDragon(220, "Smaug", 10, 20, 40, 40);
+            IceDragon iceDragon = new IceDragon(1, 200, "Winter", 15, 20, 35, 50);
+            GoldDragon goldDragon = new GoldDragon(2, 220, "Smaug", 10, 20, 40, 40);
+            Dragon dragon = new Dragon(3, 160, "Cracow Dragon", 7, 8);
+            MythicalCreature mythicalCreature1 = new MythicalCreature(4, 50, "Dwarf");
+            MythicalCreature mythicalCreature2 = new MythicalCreature(5, 15, "Goblin");
+            MythicalCreature mythicalCreature3 = new MythicalCreature(6, 40, "Orc");
             List<Object> creatures = new List<Object>() { iceDragon, goldDragon };
 
             mythicalManager.Inherit(creatures, 0);
+            mythicalManager.Insert(dragon);
+            mythicalManager.Insert(iceDragon);
+            mythicalManager.Insert(goldDragon);
+            mythicalManager.Insert(mythicalCreature1);
+            mythicalManager.Insert(mythicalCreature2);
+            mythicalManager.Insert(mythicalCreature3);
 
             Console.WriteLine("Utter success");
         }
@@ -39,8 +49,9 @@ namespace SingleTableInheritanceTest
         [Column("mythical_name")]
         string name { get; set; }
 
-        public MythicalCreature(int health, string name)
+        public MythicalCreature(int id, int health, string name)
         {
+            this.id = id;
             this.health = health;
             this.name = name;
         }
@@ -54,7 +65,7 @@ namespace SingleTableInheritanceTest
         [Column()]
         int endurance { get; set; }
 
-        public Dragon(int health, string name, int blastPower, int endurance) : base(health, name)
+        public Dragon(int id, int health, string name, int blastPower, int endurance) : base(id, health, name)
         {
             this.blastPower = blastPower;
             this.endurance = endurance;
@@ -69,8 +80,8 @@ namespace SingleTableInheritanceTest
         [Column()]
         double preciousness { get; set; }
 
-        public GoldDragon(int health, string name, int fireCapacity, int endurance, int mineralHunger, double preciousness)
-            : base(health, name, fireCapacity, endurance)
+        public GoldDragon(int id, int health, string name, int fireCapacity, int endurance, int mineralHunger, double preciousness)
+            : base(id, health, name, fireCapacity, endurance)
         {
             this.mineralHunger = mineralHunger;
             this.preciousness = preciousness;
@@ -85,8 +96,8 @@ namespace SingleTableInheritanceTest
         [Column("ice_fire")]
         double iceFire { get; set; }
 
-        public IceDragon(int health, string name, int fireCapacity, int endurance, int timeFreeze, double iceFire)
-            : base(health, name, fireCapacity, endurance)
+        public IceDragon(int id, int health, string name, int fireCapacity, int endurance, int timeFreeze, double iceFire)
+            : base(id, health, name, fireCapacity, endurance)
         {
             this.timeFreeze = timeFreeze;
             this.iceFire = iceFire;

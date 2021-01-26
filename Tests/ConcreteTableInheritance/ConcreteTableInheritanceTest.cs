@@ -13,14 +13,20 @@ namespace ConcreteTableInheritanceTest
 
             // local 
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
-            // szymon -> "LAPTOP-BHF7G1P9", "Test" databases (like tests directories)
+            // szymon -> "LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest"
 
             DataManager vehicleManager = new DataManager("LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest");
 
             FourWheeledVehicle car = new FourWheeledVehicle(1, 250.21, 8.12);
-            TwoWheeledVehicle motorbike = new TwoWheeledVehicle(2, 166.67, 20.51);
+            TwoWheeledVehicle motorbike = new TwoWheeledVehicle(1, 166.67, 20.51);
+            Vehicle truck = new Vehicle(1, 105.51);
+            Vehicle bike = new Vehicle(2, 51.66);
             List<Object> vehicles = new List<Object>() { car, motorbike };
             vehicleManager.Inherit(vehicles, 2);
+            vehicleManager.Insert(car);
+            vehicleManager.Insert(motorbike);
+            vehicleManager.Insert(truck);
+            vehicleManager.Insert(bike);
 
             Console.WriteLine("Utter success");
         }

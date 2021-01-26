@@ -124,12 +124,13 @@ namespace Design_Patterns_project.Connection
             }
         }
 
-
         // Check if table of given name exists
         public bool CheckIfTableExists(string tableName){
             string sqlQuery = "SELECT CASE WHEN OBJECT_ID('dbo."+tableName+"', 'U') IS NOT NULL THEN 1 ELSE 0 END;";
             SqlCommand command = new SqlCommand(sqlQuery,this._connection);
+            ConnectAndOpen();
             int result = (Int32)command.ExecuteScalar();
+            Dispose();
             return (result == 1);
         }
 
@@ -143,6 +144,7 @@ namespace Design_Patterns_project.Connection
                 string sqlQuery = "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '"+tableName+"'";
                 
                 SqlCommand command = new SqlCommand(sqlQuery,this._connection);
+                ConnectAndOpen();
                 SqlDataReader reader = command.ExecuteReader();
 
                 while (reader.Read())
@@ -152,6 +154,7 @@ namespace Design_Patterns_project.Connection
                 }
 
                 reader.Close();
+                Dispose();
             }
 
             return columns;
