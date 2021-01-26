@@ -147,10 +147,10 @@ namespace Design_Patterns_project
 
         }
 
-        public void Insert(Object obj, Tuple<string,object> parentKey = null)
+        public void Insert(Object obj, Tuple<string, object> parentKey = null)
         {
             string tableName = _dataMapper.GetTableName(obj.GetType());
-            List<Tuple<string, object>> columnsAndValuesList;         
+            List<Tuple<string, object>> columnsAndValuesList;
             object primaryKey;
             object primaryKeyName;
 
@@ -268,10 +268,17 @@ namespace Design_Patterns_project
         public void Delete(Type type, List<SqlCondition> listOfCriteria)
 
         {
+            string tableName = _dataMapper.GetTableName(type);
+            QueryBuilder queryBuilder = new QueryBuilder();
+            String query = queryBuilder.CreateDeleteQuery(tableName, listOfCriteria);
+
+            _msSqlConnection.ConnectAndOpen();
+            _msSqlConnection.ExecuteQuery(query);
+            _msSqlConnection.Dispose();
 
         }
 
-        public void Update()
+        public void Update(Type type, List<Tuple<string, object>> valuesToSet, List<SqlCondition> criterias)
         {
 
         }
