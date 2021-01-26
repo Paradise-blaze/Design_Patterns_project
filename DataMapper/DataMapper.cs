@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Data.SqlClient;
 using System.Collections;
+using System.Linq;
 using Design_Patterns_project.Attributes;
 
 namespace Design_Patterns_project
@@ -13,6 +14,21 @@ namespace Design_Patterns_project
         {
             BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             PropertyInfo[] typeProperties = type.GetProperties(bindingFlags);
+
+            return typeProperties;
+        }
+
+        public static PropertyInfo[] GetTypeAllProperties(Type type)
+        {
+            PropertyInfo[] typeProperties = new PropertyInfo[] { };
+            Type currentType = type;
+
+            while (currentType != typeof(Object))
+            {
+                PropertyInfo[] currentProperties = GetTypeProperties(currentType);
+                typeProperties = typeProperties.Concat(currentProperties).ToArray();
+                currentType = currentType.BaseType;
+            }
 
             return typeProperties;
         }
@@ -58,11 +74,20 @@ namespace Design_Patterns_project
             return columnNames;
         }
 
-        public List<Tuple<string, Object>> GetColumnsAndValues(Object instance)
+        public List<Tuple<string, Object>> GetColumnsAndValues(Object instance, bool isInherited = false)
         {
             List<Tuple<string, Object>> list = new List<Tuple<string, Object>> { };
             Type instanceType = instance.GetType();
-            PropertyInfo[] properties = GetTypeProperties(instanceType);
+            PropertyInfo[] properties;
+
+            if (isInherited)
+            {
+                properties = GetTypeAllProperties(instanceType);
+            }
+            else
+            {
+                properties = GetTypeProperties(instanceType);
+            }
             
             foreach (PropertyInfo property in properties)
             {
@@ -135,12 +160,21 @@ namespace Design_Patterns_project
             return list;
         }
 
-        public Object FindPrimaryKey(Object instance)
+        public Object FindPrimaryKey(Object instance, bool isInherited = false)
         {
             Object primaryKey;
             Type instanceType = instance.GetType();
-            PropertyInfo[] properties = GetTypeProperties(instanceType);
-            
+            PropertyInfo[] properties;
+
+            if (isInherited)
+            {
+                properties = GetTypeAllProperties(instanceType);
+            }
+            else
+            {
+                properties = GetTypeProperties(instanceType);
+            }
+
             foreach (PropertyInfo property in properties)
             {
                 Object[] att = property.GetCustomAttributes(typeof(PKeyAttribute), false);
@@ -156,11 +190,19 @@ namespace Design_Patterns_project
             return null;
         }
 
-        public string FindPrimaryKeyFieldName(Object instance)
+        public string FindPrimaryKeyFieldName(Type instanceType, bool isInherited = false)
         {
-            Type instanceType = instance.GetType();
-            PropertyInfo[] properties = GetTypeProperties(instanceType);
-            
+            PropertyInfo[] properties;
+
+            if (isInherited)
+            {
+                properties = GetTypeAllProperties(instanceType);
+            }
+            else
+            {
+                properties = GetTypeProperties(instanceType);
+            }
+
             foreach (PropertyInfo property in properties)
             {
                 Object pKeyAttribute = (PKeyAttribute)property.GetCustomAttribute(typeof(PKeyAttribute), false);

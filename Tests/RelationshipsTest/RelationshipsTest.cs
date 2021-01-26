@@ -13,15 +13,15 @@ namespace RelationshipsTest
 
             // local 
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
-            // szymon -> "LAPTOP-BHF7G1P9", "Test" databases (like tests directories)
+            // szymon -> "LAPTOP-BHF7G1P9", "RelationshipsTest"
 
-            DataManager mountainManager = new DataManager("DESKTOP-HVUO0CP", "TestDB");
+            DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
 
-            Flea flea1 = new Flea(1,"skoczuszka",42.9);
-            Flea flea2 = new Flea(2,"sokolica",12.19);
-            Flea flea3 = new Flea(3,"perelka",42.93);
+            Flea flea1 = new Flea(1, "Skoczuszka", 42.9);
+            Flea flea2 = new Flea(2, "Sokolica", 12.19);
+            Flea flea3 = new Flea(3, "Perelka", 42.93);
 
-            Bowl bowl = new Bowl(1,"DogFood",10);
+            Bowl bowl = new Bowl(1,"DogFood", 10);
 
             Dog testDog = new Dog(1, "Burek", 6, bowl);
 

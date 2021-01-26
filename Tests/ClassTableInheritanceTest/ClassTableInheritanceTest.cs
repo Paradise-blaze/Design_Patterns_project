@@ -13,14 +13,20 @@ namespace ClassTableInheritanceTest
 
             // local 
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
-            // szymon -> "LAPTOP-BHF7G1P9", "Test" databases (like tests directories)
+            // szymon -> "LAPTOP-BHF7G1P9", "ClassTableInheritanceTest"
 
             DataManager wizardManager = new DataManager("LAPTOP-BHF7G1P9", "ClassTableInheritanceTest");
 
             ArchMage archMage = new ArchMage(1, "Gandalf", 1, 2.32, 1, 106);
-            DarkMage darkMage = new DarkMage(2, "Saruman", 2, 2.26, 89);
+            DarkMage darkMage = new DarkMage(2, "Saruman", 1, 2.26, 1, 89);
+            Mage mage = new Mage(3, "Radagast", 1, 67);
+            Character character = new Character(4, "Bilbo");
             List<Object> mages = new List<Object>() { archMage, darkMage };
             wizardManager.Inherit(mages, 1);
+            wizardManager.Insert(archMage);
+            wizardManager.Insert(darkMage);
+            wizardManager.Insert(mage);
+            wizardManager.Insert(character);
 
             Console.WriteLine("Utter success");
         }
@@ -77,11 +83,17 @@ namespace ClassTableInheritanceTest
 
     class DarkMage : Mage
     {
+        [PKey()]
+        [Column("id")]
+        int darkMageID { get; set; }
+
         [Column()]
         double necromancy { get; set; }
 
-        public DarkMage(int id, string name, int mageID, double spell_skills, double necromancy) : base(id, name, mageID, spell_skills)
+        public DarkMage(int id, string name, int mageID, double spell_skills, int darkMageID, double necromancy) 
+            : base(id, name, mageID, spell_skills)
         {
+            this.darkMageID = darkMageID;
             this.necromancy = necromancy;
         }
     }
