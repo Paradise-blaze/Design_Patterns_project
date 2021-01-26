@@ -31,14 +31,14 @@ namespace Design_Patterns_project.SqlCommands
                         returnQuery += "'" + it.Item2 + "'" + ", ";
                 }
                 else
-                {   
-                    
-                    returnQuery += it.Item2 + ", ";
+                {
+                    string value = it.Item2.ToString().Replace(',', '.');
+                    returnQuery += value + ", ";
                 }
             }
             returnQuery = returnQuery.Remove(returnQuery.Length - 2);
             returnQuery += ");";
-
+            
             return returnQuery;
         }
 
@@ -126,12 +126,6 @@ namespace Design_Patterns_project.SqlCommands
         {
             string query = "DELETE FROM " + tableName + GenerateWhereClause(listOfSqlCondition);
             return query;
-        }
-
-        public string CreateSelectByIdQuery(string tableName, object id, string primaryKeyName)
-        {
-            string result = "SELECT * FROM " + tableName + " WHERE " + tableName + "." + primaryKeyName + "=" + id + ";";
-            return result;
         }
 
         public string CreateSelectQuery(string tablename, List<SqlCondition> listOfSqlCondition)

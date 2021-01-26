@@ -31,9 +31,11 @@ namespace ClassTableInheritanceTest
             Character character3 = new Character(3, "King Arthur");
             List<Object> mages = new List<Object>() { archMage1, darkMage1 };
 
+            //create and inherit
             wizardManager.Inherit(mages, 1);
 
-            /*wizardManager.Insert(archMage1);
+            //insert
+            wizardManager.Insert(archMage1);
             wizardManager.Insert(archMage2);
             wizardManager.Insert(archMage3);
             wizardManager.Insert(archMage4);
@@ -45,13 +47,28 @@ namespace ClassTableInheritanceTest
             wizardManager.Insert(character2);
             wizardManager.Insert(character3);
 
+            //select
+            List<SqlCondition> selectConditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 6) };
+            string select = wizardManager.Select(typeof(ArchMage), selectConditions);
+            Console.WriteLine('\n' + select + '\n');
+
+            //delete
             wizardManager.Delete(archMage2);
             List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 2) };
-            wizardManager.Delete("darkMage", conditions);*/
+            wizardManager.Delete("darkMage", conditions);
 
+            //select
+            select = wizardManager.Select(typeof(ArchMage), selectConditions);
+            Console.WriteLine('\n' + select + '\n');
+
+            //update
             List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, object>> { new Tuple<string, Object>("years_of_experience", 99) };
             List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.Equals("id", 3) };
             wizardManager.Update(typeof(ArchMage), valuesToSet, updateConditions);
+
+            //select
+            select = wizardManager.Select(typeof(ArchMage), selectConditions);
+            Console.WriteLine('\n'+select+'\n');
 
             Console.WriteLine("Utter success");
         }

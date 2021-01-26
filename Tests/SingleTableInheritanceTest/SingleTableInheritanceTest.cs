@@ -22,7 +22,7 @@ namespace SingleTableInheritanceTest
             IceDragon iceDragon2 = new IceDragon(8, 210, "Whiter", 19, 22, 37, 51);
             IceDragon iceDragon3 = new IceDragon(9, 200, "Freezer", 14, 23, 31, 46);
             GoldDragon goldDragon1 = new GoldDragon(2, 220, "Smaug", 10, 20, 40, 40);
-            GoldDragon goldDragon2 = new GoldDragon(10, 250, "Villentretenmerth", 19, 25, 45, 55);
+            GoldDragon goldDragon2 = new GoldDragon(10, 250, "Borch", 19, 25, 45, 55);
             Dragon dragon1 = new Dragon(3, 160, "Cracow Dragon", 12, 8);
             Dragon dragon2 = new Dragon(7, 150, "English Dragon", 5, 10);
             MythicalCreature mythicalCreature1 = new MythicalCreature(4, 50, "Dwarf");
@@ -30,9 +30,11 @@ namespace SingleTableInheritanceTest
             MythicalCreature mythicalCreature3 = new MythicalCreature(6, 40, "Orc");
             List<Object> creatures = new List<Object>() { iceDragon1, goldDragon1 };
 
+            //create and inherit
             mythicalManager.Inherit(creatures, 0);
 
-           /* mythicalManager.Insert(dragon1);
+            //insert
+            mythicalManager.Insert(dragon1);
             mythicalManager.Insert(dragon2);
             mythicalManager.Insert(iceDragon1);
             mythicalManager.Insert(iceDragon2);
@@ -43,13 +45,28 @@ namespace SingleTableInheritanceTest
             mythicalManager.Insert(mythicalCreature2);
             mythicalManager.Insert(mythicalCreature3);
 
+            //select
+            List<SqlCondition> selectConditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
+            string select = mythicalManager.Select(typeof(MythicalCreature), selectConditions);
+            Console.WriteLine('\n' + select + '\n');
+
+            //delete
             List<SqlCondition> deleteConditions = new List<SqlCondition> { SqlCondition.LowerThan("blast_power", 11) };
             mythicalManager.Delete("MythicalCreature", deleteConditions);
-            mythicalManager.Delete(dragon1);*/
+            mythicalManager.Delete(dragon1);
 
+            //select
+            select = mythicalManager.Select(typeof(MythicalCreature), selectConditions);
+            Console.WriteLine('\n' + select + '\n');
+
+            //update
             List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, Object>> { new Tuple<string, Object>("endurance", 10) };
             List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.LowerThan("health", 100) };
             mythicalManager.Update(typeof(MythicalCreature), valuesToSet, updateConditions);
+
+            //select
+            select = mythicalManager.Select(typeof(MythicalCreature), selectConditions);
+            Console.WriteLine('\n' + select + '\n');
 
             Console.WriteLine("Utter success");
         }

@@ -51,16 +51,42 @@ namespace RelationshipsTest
             testShepherd.AddAlp(alp1);
             testShepherd.AddAlp(alp2);
 
-            // mountainManager.CreateTable(testShepherd);
-            // mountainManager.Insert(testShepherd);
+            //create
+            mountainManager.CreateTable(testShepherd);
+            mountainManager.Insert(testShepherd);
 
-            // mountainManager.Delete(flea3);
-            // List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.LowerThan("nr_owcy", 236) };
-            // mountainManager.Delete("znacznik", conditions);
+            //select
+            List<SqlCondition> selectConditions1 = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
+            string select1 = mountainManager.Select(typeof(Sheep), selectConditions1);
+            Console.WriteLine('\n' + select1 + '\n');
 
+            List<SqlCondition> selectConditions2 = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
+            string select2 = mountainManager.Select(typeof(Flea), selectConditions2);
+            Console.WriteLine('\n' + select2 + '\n');
+
+            //delete
+            mountainManager.Delete(flea3);
+            List<SqlCondition> deleteConditions = new List<SqlCondition> { SqlCondition.LowerThan("nr_owcy", 236) };
+            mountainManager.Delete("znacznik", deleteConditions);
+
+            //select
+            select1 = mountainManager.Select(typeof(Sheep), selectConditions1);
+            Console.WriteLine('\n' + select1 + '\n');
+
+            select2 = mountainManager.Select(typeof(Flea), selectConditions2);
+            Console.WriteLine('\n' + select2 + '\n');
+
+            //update
             List<Tuple<string, object>> valuesToSet = new List<Tuple<string, object>> {new Tuple<string,object>("jakosc_welny",1.5)};
-            List<SqlCondition> conditions = new List<SqlCondition> {SqlCondition.GreaterThan("jakosc_welny",1.25)};
-            mountainManager.Update(typeof(Sheep),valuesToSet,conditions);
+            List<SqlCondition> updateConditions = new List<SqlCondition> {SqlCondition.GreaterThan("jakosc_welny",1.25)};
+            mountainManager.Update(typeof(Sheep), valuesToSet, updateConditions);
+
+            //select
+            select1 = mountainManager.Select(typeof(Sheep), selectConditions1);
+            Console.WriteLine('\n' + select1 + '\n');
+
+            select2 = mountainManager.Select(typeof(Flea), selectConditions2);
+            Console.WriteLine('\n' + select2 + '\n');
 
             Console.WriteLine("Utter success");
         }
@@ -140,7 +166,7 @@ namespace RelationshipsTest
     class Flea
     {
         [PKey()]
-        [Column("identyfikator")]
+        [Column()]
         int id { get; set; }
 
         [Column("pseudonim")]
@@ -185,7 +211,7 @@ namespace RelationshipsTest
     class Sheep
     {
         [PKey()]
-        [Column("identyfikator")]
+        [Column()]
         int id { get; set; }
 
         [Column("imie")]
