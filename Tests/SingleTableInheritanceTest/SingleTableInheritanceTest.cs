@@ -15,8 +15,8 @@ namespace SingleTableInheritanceTest
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "SingleTableInheritanceTest"
 
-            //DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
-            DataManager mythicalManager = new DataManager("DESKTOP-HVUO0CP", "SingleTableInheritanceTest");
+            DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
+            //DataManager mythicalManager = new DataManager("DESKTOP-HVUO0CP", "SingleTableInheritanceTest");
 
             IceDragon iceDragon1 = new IceDragon(1, 220, "Winter", 15, 20, 35, 50);
             IceDragon iceDragon2 = new IceDragon(8, 210, "Whiter", 19, 22, 37, 51);
@@ -32,7 +32,7 @@ namespace SingleTableInheritanceTest
 
             mythicalManager.Inherit(creatures, 0);
 
-            mythicalManager.Insert(dragon1);
+           /* mythicalManager.Insert(dragon1);
             mythicalManager.Insert(dragon2);
             mythicalManager.Insert(iceDragon1);
             mythicalManager.Insert(iceDragon2);
@@ -43,9 +43,13 @@ namespace SingleTableInheritanceTest
             mythicalManager.Insert(mythicalCreature2);
             mythicalManager.Insert(mythicalCreature3);
 
-            List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.LowerThan("blast_power", 11) };
-            mythicalManager.Delete("MythicalCreature", conditions);
-            mythicalManager.Delete(dragon1);
+            List<SqlCondition> deleteConditions = new List<SqlCondition> { SqlCondition.LowerThan("blast_power", 11) };
+            mythicalManager.Delete("MythicalCreature", deleteConditions);
+            mythicalManager.Delete(dragon1);*/
+
+            List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, Object>> { new Tuple<string, Object>("endurance", 10) };
+            List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.LowerThan("health", 100) };
+            mythicalManager.Update(typeof(MythicalCreature), valuesToSet, updateConditions);
 
             Console.WriteLine("Utter success");
         }

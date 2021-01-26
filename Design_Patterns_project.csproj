@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <!-- <StartupObject>ConcreteTableInheritanceTest.ConcreteTableInheritanceTest</StartupObject> -->
     <!-- <StartupObject>SingleTableInheritanceTest.SingleTableInheritanceTest</StartupObject> -->
-    <StartupObject>RelationshipsTest.RelationshipsTest</StartupObject>
+    <StartupObject>ConcreteTableInheritanceTest.ConcreteTableInheritanceTest</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
