@@ -13,10 +13,10 @@ namespace RelationshipsTest
 
             // local 
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
-            // szymon -> "LAPTOP-BHF7G1P9", "Test" databases (like tests directories)
+            // szymon -> "LAPTOP-BHF7G1P9", "RelationshipsTest" databases (like tests directories)
             // Blacki7 - > "DESKTOP-BO1NL9H", "test1"  (work in progress)
 
-            DataManager mountainManager = new DataManager("den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_");
+            DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
 
             Flea flea1 = new Flea(1, "Skoczuszka", 42.9);
             Flea flea2 = new Flea(2, "Sokolica", 12.19);
@@ -52,6 +52,10 @@ namespace RelationshipsTest
 
             mountainManager.CreateTable(testShepherd);
             mountainManager.Insert(testShepherd);
+
+            mountainManager.Delete(flea3);
+            List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.LowerThan("nr_owcy", 236) };
+            mountainManager.Delete("znacznik", conditions);
 
             Console.WriteLine("Utter success");
         }
@@ -130,7 +134,6 @@ namespace RelationshipsTest
     [Table("pchla")]
     class Flea
     {
-
         [PKey()]
         [Column("identyfikator")]
         int id { get; set; }

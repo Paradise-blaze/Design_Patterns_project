@@ -186,17 +186,16 @@ namespace Design_Patterns_project
             List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(obj);
             List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(obj);
 
-            QueryBuilder query = new QueryBuilder();
             string insertQuery;
 
             if (parentKey != null)
             {
                 columnsAndValuesList.Add(parentKey);
-                insertQuery = query.CreateInsertQuery(tableName, columnsAndValuesList);
+                insertQuery = _queryBuilder.CreateInsertQuery(tableName, columnsAndValuesList);
             }
             else
             {
-                insertQuery = query.CreateInsertQuery(tableName, columnsAndValuesList);
+                insertQuery = _queryBuilder.CreateInsertQuery(tableName, columnsAndValuesList);
             }
 
             _msSqlConnection.ConnectAndOpen();
@@ -255,7 +254,7 @@ namespace Design_Patterns_project
                         List<Tuple<string, object>> keysAndValues = new List<Tuple<string, object>> { oneTableKey, secondTableKey };
 
                         string associationTableName = GetMergedNames((string)tableName, (string)secondMemberTableName);
-                        string intoAssocTableInsertQuery = query.CreateInsertQuery(associationTableName, keysAndValues);
+                        string intoAssocTableInsertQuery = _queryBuilder.CreateInsertQuery(associationTableName, keysAndValues);
 
                         _msSqlConnection.ConnectAndOpen();
                         _msSqlConnection.ExecuteQuery(intoAssocTableInsertQuery);
@@ -265,18 +264,54 @@ namespace Design_Patterns_project
             }
         }
 
-        public void Delete(Type type, List<SqlCondition> listOfCriteria)
-
+        public void Delete(Object obj)
         {
-            string tableName = _dataMapper.GetTableName(type);
-            QueryBuilder queryBuilder = new QueryBuilder();
-            String query = queryBuilder.CreateDeleteQuery(tableName, listOfCriteria);
+            string primaryKeyName;
+            Object primaryKey;
+            string tableName = _dataMapper.GetTableName(obj.GetType());
+
+            if (_msSqlConnection.CheckIfTableExists(tableName))
+            {
+                // concrete table inheritance
+                if ((_msSqlConnection.GetColumnNamesFromTable(tableName)).Count == (DataMapper.GetTypeAllProperties(obj.GetType())).Length)
+                {
+                    primaryKey = _dataMapper.FindPrimaryKey(obj, true);
+                    primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType(), true);
+                }
+                // class table inheritance or normal insert on single class
+                else
+                {
+                    primaryKey = _dataMapper.FindPrimaryKey(obj);
+                    primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType());
+                }
+            }
+            // single table inheritance
+            else
+            {
+                Type rootHierarchyType = _tableInheritance.GetMainType(obj);
+                tableName = _dataMapper.GetTableName(rootHierarchyType);
+                primaryKey = _dataMapper.FindPrimaryKey(obj, true);
+                primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType(), true);
+            }
+
+            List<SqlCondition> listOfCriteria = new List<SqlCondition> { SqlCondition.Equals(primaryKeyName, primaryKey) };
+            string query = _queryBuilder.CreateDeleteQuery(tableName, listOfCriteria);
 
             _msSqlConnection.ConnectAndOpen();
             _msSqlConnection.ExecuteQuery(query);
             _msSqlConnection.Dispose();
-
         }
+
+        public void Delete(string tableName, List<SqlCondition> listOfCriteria)
+        {
+            String query = _queryBuilder.CreateDeleteQuery(tableName, listOfCriteria);
+
+            _msSqlConnection.ConnectAndOpen();
+            _msSqlConnection.ExecuteQuery(query);
+            _msSqlConnection.Dispose();
+        }
+
+        // delete table???
 
         public void Update(Type type, List<Tuple<string, object>> valuesToSet, List<SqlCondition> criterias)
         {

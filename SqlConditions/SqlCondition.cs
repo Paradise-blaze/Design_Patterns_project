@@ -1,6 +1,6 @@
 using System;
 
-namespace Design_Patterns_project.SqlCommands
+namespace Design_Patterns_project
 {
     public class SqlCondition
     {
