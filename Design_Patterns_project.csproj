@@ -3,7 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <StartupObject>ConcreteTableInheritanceTest.ConcreteTableInheritanceTest</StartupObject>
+    <!-- <StartupObject>ConcreteTableInheritanceTest.ConcreteTableInheritanceTest</StartupObject> -->
+    <StartupObject>ClassTableInheritanceTest.ClassTableInheritanceTest</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
