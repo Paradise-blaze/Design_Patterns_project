@@ -152,7 +152,8 @@ namespace Design_Patterns_project
 
         }
 
-        public void Delete()
+        public void Delete(Type type, List<SqlCondition> listOfCriteria)
+
         {
 
         }

@@ -14,25 +14,26 @@ namespace RelationshipsTest
             // local 
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "Test" databases (like tests directories)
+            // Blacki7 - > "DESKTOP-BO1NL9H", "test1"  (work in progress)
 
-            DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
+            DataManager mountainManager = new DataManager("den1.mssql7.gear.host", "DPTest", "dptest", "Me3JyhRLOg-_");
 
-            Dog testDog = new Dog(1, "Burek", 6);
-            Sheep sheep1 = new Sheep(1, "Marcysia", 2.35);
-            Sheep sheep2 = new Sheep(2, "Pola", 1.84);
-            Sheep sheep3 = new Sheep(3, "Hania", 1.27);
-            Alp alp1 = new Alp(1, "Rozlegla dolina", 5.61);
-            Alp alp2 = new Alp(2, "Gorska tajemnica", 7.42);
-            Shepherd testShepherd = new Shepherd(1, "Franek", testDog);
+            /*            Dog testDog = new Dog(1, "Burek", 6);
+                        Sheep sheep1 = new Sheep(1, "Marcysia", 2.35);
+                        Sheep sheep2 = new Sheep(2, "Pola", 1.84);
+                        Sheep sheep3 = new Sheep(3, "Hania", 1.27);
+                        Alp alp1 = new Alp(1, "Rozlegla dolina", 5.61);
+                        Alp alp2 = new Alp(2, "Gorska tajemnica", 7.42);
+                        Shepherd testShepherd = new Shepherd(1, "Franek", testDog);
 
-            testShepherd.AddSheep(sheep1);
-            testShepherd.AddSheep(sheep2);
-            testShepherd.AddSheep(sheep3);
+                        testShepherd.AddSheep(sheep1);
+                        testShepherd.AddSheep(sheep2);
+                        testShepherd.AddSheep(sheep3);
 
-            testShepherd.AddAlp(alp1);
-            testShepherd.AddAlp(alp2);
+                        testShepherd.AddAlp(alp1);
+                        testShepherd.AddAlp(alp2);
 
-            mountainManager.CreateTable(testShepherd);
+                        mountainManager.CreateTable(testShepherd);*/
 
             Console.WriteLine("Utter success");
         }
