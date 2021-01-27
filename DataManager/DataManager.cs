@@ -162,24 +162,15 @@ namespace Design_Patterns_project
             List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.Equals(primaryKeyName, primaryKey) };
             String query = _queryBuilder.CreateSelectQuery(tableName, conditions);
 
-            List<Relationship> oneToOneRelationships = _relationshipFinder.FindOneToOne(obj);
-            List<Relationship> oneToManyRelationships = _relationshipFinder.FindOneToMany(obj);
-            List<Relationship> ManyToManyRelationships = _relationshipFinder.FindManyToMany(obj);
+            _msSqlConnection.ConnectAndOpen();
 
-            if (oneToOneRelationships.Count == 0 && oneToManyRelationships.Count == 0 && ManyToManyRelationships.Count == 0)
-            {
-                _msSqlConnection.ConnectAndOpen();
+            SqlCommand command = new SqlCommand(query, _msSqlConnection.GetConnection());
+            SqlDataReader reader = command.ExecuteReader();
+            Object mappedObject = _dataMapper.MapTableIntoObject(obj, reader);
 
-                SqlCommand command = new SqlCommand(query, _msSqlConnection.GetConnection());
-                SqlDataReader reader = command.ExecuteReader();
-                Object mappedObject = _dataMapper.MapTableIntoObject(obj, reader);
+            _msSqlConnection.Dispose();
 
-                _msSqlConnection.Dispose();
-
-                return mappedObject;
-            }
-
-                return null;
+            return mappedObject;
         }
 
         public void Insert(Object obj, Tuple<string, object> parentKey = null)

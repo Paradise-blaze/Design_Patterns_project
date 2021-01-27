@@ -225,34 +225,31 @@ namespace Design_Patterns_project
 
             foreach (PropertyInfo property in properties)
             {
-                Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
-                Object[] oneToOneAttributes = property.GetCustomAttributes(typeof(OneToOneAttribute), false);
+                ColumnAttribute columnAttribute = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
+                OneToOneAttribute oneToOneAttribute = (OneToOneAttribute)property.GetCustomAttribute(typeof(OneToOneAttribute), false);
+                OneToManyAttribute oneToManyAttribute = (OneToManyAttribute)property.GetCustomAttribute(typeof(OneToManyAttribute), false);
+                ManyToManyAttribute manyToManyAttribute = (ManyToManyAttribute)property.GetCustomAttribute(typeof(ManyToManyAttribute), false);
 
-                if (columnAttributes.Length == 0)
+                if (columnAttribute == null)
                 {
-                    string columnName = property.Name;
+                    continue;
                 }
-
-                else
+                
+                if (oneToOneAttribute == null && oneToManyAttribute == null && manyToManyAttribute == null)
                 {
-                    if (oneToOneAttributes.Length != 0) { continue; }
-
                     string columnNameInObject;
 
-                    foreach (ColumnAttribute atr in columnAttributes)
+                    if (columnAttribute._columnName == null)
                     {
-                        if (atr._columnName == null)
-                        {
-                            columnNameInObject = property.Name;
-                        }
-                        else
-                        {
-                            columnNameInObject = atr._columnName;
-                        }
-
-                        var value = columnNamesAndTheirValues[columnNameInObject];
-                        property.SetValue(instance, value, null);
+                        columnNameInObject = property.Name;
                     }
+                    else
+                    {
+                        columnNameInObject = columnAttribute._columnName;
+                    }
+
+                    var value = columnNamesAndTheirValues[columnNameInObject];
+                    property.SetValue(instance, value, null);
                 }
             }
 
