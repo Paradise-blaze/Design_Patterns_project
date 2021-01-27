@@ -92,6 +92,11 @@ namespace RelationshipsTest
             Console.WriteLine(label3.id);
             Console.WriteLine(label3.nr);
 
+            sheep2 = (Sheep)mountainManager.SelectById(sheep2, 2);
+            Console.WriteLine(sheep2.id);
+            Console.WriteLine(sheep2.name);
+            Console.WriteLine(sheep2.woolQuality);
+
             Console.WriteLine("Utter success");
         }
     }
@@ -225,7 +230,6 @@ namespace RelationshipsTest
 
         [OneToOne]
         public Label label { get; set; }
-
 
         public Sheep(int id, string name, double woolQuality, Label label)
         {
