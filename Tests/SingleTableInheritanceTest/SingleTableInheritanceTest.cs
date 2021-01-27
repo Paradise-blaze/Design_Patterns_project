@@ -68,6 +68,11 @@ namespace SingleTableInheritanceTest
             select = mythicalManager.Select(typeof(MythicalCreature), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
+            mythicalCreature1 = (MythicalCreature)mythicalManager.SelectById(mythicalCreature1, 1);
+            Console.WriteLine(mythicalCreature1.id);
+            Console.WriteLine(mythicalCreature1.name);
+            Console.WriteLine(mythicalCreature1.health);
+
             Console.WriteLine("Utter success");
         }
     }
@@ -76,13 +81,13 @@ namespace SingleTableInheritanceTest
     {
         [PKey()]
         [Column()]
-        int id { get; set; }
+        public int id { get; set; }
 
         [Column()]
-        int health { get; set; }
+        public int health { get; set; }
 
         [Column("mythical_name")]
-        string name { get; set; }
+        public string name { get; set; }
 
         public MythicalCreature(int id, int health, string name)
         {

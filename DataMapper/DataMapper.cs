@@ -47,33 +47,6 @@ namespace Design_Patterns_project
             }
         }
 
-        public List<string> GetColumnNamesFromObject(Object instance)
-        {
-            List<string> columnNames = new List<string>();
-            Type instanceType = instance.GetType();
-            PropertyInfo[] instanceProperties = GetTypeProperties(instanceType);
-
-            foreach (PropertyInfo property in instanceProperties)
-            {
-                ColumnAttribute columnAttribute = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
-
-                if (columnAttribute != null)
-                {
-                    if (columnAttribute._columnName == null)
-                    {
-                        string columnName = property.Name;
-                        columnNames.Add(columnName);
-                    }
-                    else
-                    {
-                        columnNames.Add(columnAttribute._columnName);
-                    }
-                }
-            }
-
-            return columnNames;
-        }
-
         public List<Tuple<string, Object>> GetColumnsAndValues(Object instance, bool isInherited = false)
         {
             List<Tuple<string, Object>> list = new List<Tuple<string, Object>> { };
@@ -243,38 +216,6 @@ namespace Design_Patterns_project
             return columnNamesAndTheirValues;
         }
 
-        public Object GetValueOfForeignKey(PropertyInfo property, SqlDataReader reader)
-        {
-            Dictionary<string, Object> columnNamesAndTheirValues = CreateDictionaryFromTable(reader);
-            reader.Close();
-
-            if (columnNamesAndTheirValues.Count == 0)
-            {
-                return null;
-            }
-
-            Object[] columnAttributes = property.GetCustomAttributes(typeof(ColumnAttribute), false);
-
-            if (columnAttributes.Length != 0)
-            {
-                string columnNameInObject;
-                ColumnAttribute columnAttribute = (ColumnAttribute)columnAttributes[0];
-
-                if (columnAttribute._columnName == null)
-                {
-                    columnNameInObject = property.Name;
-                }
-                else
-                {
-                    columnNameInObject = columnAttribute._columnName;
-                }
-
-                return columnNamesAndTheirValues[columnNameInObject];
-            }
-
-            return null;
-        }
-
         public Object MapTableIntoObject(Object instance, SqlDataReader reader)
         {
             Dictionary<string, Object> columnNamesAndTheirValues = CreateDictionaryFromTable(reader);
@@ -316,28 +257,6 @@ namespace Design_Patterns_project
             }
 
             return instance;
-        }
-
-        public Object SetCertainListField(Object parent, Object children, PropertyInfo property)
-        {
-            IList childTmp = children as IList;
-            IList list = Activator.CreateInstance(property.PropertyType) as IList;
-
-            foreach (var it in childTmp)
-            {
-                list.Add(it);
-            }
-
-            property.SetValue(parent, list, null);
-
-            return parent;
-        }
-
-        public Object SetCertainField(Object parent, Object child, PropertyInfo property)
-        {
-            property.SetValue(parent, child, null);
-
-            return parent;
         }
     }
 

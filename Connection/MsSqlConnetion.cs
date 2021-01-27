@@ -9,10 +9,13 @@ namespace Design_Patterns_project.Connection
 {
     class MsSqlConnection : IDisposable
     {
-        private static readonly MsSqlConnection _instance = new MsSqlConnection();
         private SqlConnection _connection;
         private MsSqlConnectionConfig _config;
 
+        public SqlConnection GetConnection()
+        {
+            return this._connection;
+        }
 
         private MsSqlConnection()
         {
@@ -24,17 +27,6 @@ namespace Design_Patterns_project.Connection
             this._connection = new SqlConnection();
             this._config = config;
         }
-
-        public static MsSqlConnection GetsInstance()
-        {
-            return _instance;
-        }
-
-        public void SetConfiguration(MsSqlConnectionConfig config)
-        {
-            this._config = config;
-        }
-
 
         public void ConnectAndOpen()
         {
@@ -48,6 +40,7 @@ namespace Design_Patterns_project.Connection
             this._connection.Close();
             this._connection.Dispose();
         }
+
         private string ReadSingleRow(IDataRecord record, int colsAmount, int colWidht)
         {   
             string recordString = "";
@@ -66,7 +59,7 @@ namespace Design_Patterns_project.Connection
         // SELECT
         public string ExecuteSelectQuery(string sqlQuery, string tableName){
             ConnectAndOpen();
-            SqlCommand command = new SqlCommand(sqlQuery,this._connection);
+            SqlCommand command = new SqlCommand(sqlQuery, this._connection);
             Dispose();
             List<string> columnNames = GetColumnNamesFromTable(tableName);
             int maxLength = columnNames.Max(x => x.Length);
