@@ -70,6 +70,10 @@ namespace ClassTableInheritanceTest
             select = wizardManager.Select(typeof(ArchMage), selectConditions);
             Console.WriteLine('\n'+select+'\n');
 
+            archMage3 = (ArchMage)wizardManager.SelectById(archMage3, 3);
+            Console.WriteLine(archMage3.archMageID);
+            Console.WriteLine(archMage3.yearsOfExperience);
+
             Console.WriteLine("Utter success");
         }
     }
@@ -110,10 +114,10 @@ namespace ClassTableInheritanceTest
     {
         [PKey()]
         [Column("id")]
-        int archMageID { get; set; }
+        public int archMageID { get; set; }
 
         [Column("years_of_experience")]
-        int yearsOfExperience { get; set; }
+        public int yearsOfExperience { get; set; }
 
         public ArchMage(int id, string name, int mageID, double spellSkills, int archMageID, int yearsOfExperience)
             : base(id, name, mageID, spellSkills)

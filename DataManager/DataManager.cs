@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using System.Reflection;
+using System.Data.SqlClient;
 using Design_Patterns_project.Relationships;
 using Design_Patterns_project.SqlCommands;
 using Design_Patterns_project.Connection;
@@ -22,6 +23,7 @@ namespace Design_Patterns_project
             MsSqlConnectionConfig config = new MsSqlConnectionConfig(serverName, databaseName, user, password);
             this._msSqlConnection = new MsSqlConnection(config);
         }
+
         public DataManager(string serverName, string databaseName)
         {
             MsSqlConnectionConfig config = new MsSqlConnectionConfig(serverName, databaseName);
@@ -150,6 +152,34 @@ namespace Design_Patterns_project
             string selectQueryOutput = _msSqlConnection.ExecuteSelectQuery(selectQuery, tableName);
 
             return selectQueryOutput;
+        }
+
+        public object SelectById(Object obj, object primaryKey)
+        {
+            string tableName = _dataMapper.GetTableName(obj.GetType());
+            string primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType());
+
+            List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.Equals(primaryKeyName, primaryKey) };
+            String query = _queryBuilder.CreateSelectQuery(tableName, conditions);
+
+            List<Relationship> oneToOneRelationships = _relationshipFinder.FindOneToOne(obj);
+            List<Relationship> oneToManyRelationships = _relationshipFinder.FindOneToMany(obj);
+            List<Relationship> ManyToManyRelationships = _relationshipFinder.FindManyToMany(obj);
+
+            if (oneToOneRelationships.Count == 0 && oneToManyRelationships.Count == 0 && ManyToManyRelationships.Count == 0)
+            {
+                _msSqlConnection.ConnectAndOpen();
+
+                SqlCommand command = new SqlCommand(query, _msSqlConnection.GetConnection());
+                SqlDataReader reader = command.ExecuteReader();
+                Object mappedObject = _dataMapper.MapTableIntoObject(obj, reader);
+
+                _msSqlConnection.Dispose();
+
+                return mappedObject;
+            }
+
+                return null;
         }
 
         public void Insert(Object obj, Tuple<string, object> parentKey = null)

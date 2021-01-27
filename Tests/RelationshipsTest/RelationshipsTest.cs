@@ -88,6 +88,10 @@ namespace RelationshipsTest
             select2 = mountainManager.Select(typeof(Flea), selectConditions2);
             Console.WriteLine('\n' + select2 + '\n');
 
+            label3 = (Label)mountainManager.SelectById(label3, 3);
+            Console.WriteLine(label3.id);
+            Console.WriteLine(label3.nr);
+
             Console.WriteLine("Utter success");
         }
     }
@@ -97,16 +101,16 @@ namespace RelationshipsTest
     {
         [PKey()]
         [Column("identyfikator")]
-        int id { get; set; }
+        public int id { get; set; }
 
         [Column("imie")]
-        string name { get; set; }
+        public string name { get; set; }
 
         [OneToOne]
         Dog dog { get; set; }
 
         [OneToMany]
-        List<Sheep> sheep { get; set; } = new List<Sheep>();
+        public List<Sheep> sheep { get; set; } = new List<Sheep>();
 
         [ManyToMany]
         List<Alp> alps { get; set; } = new List<Alp>();
@@ -122,7 +126,6 @@ namespace RelationshipsTest
         {
             this.sheep.Add(newSheep);
         }
-
         public void AddAlp(Alp newAlp)
         {
             this.alps.Add(newAlp);
@@ -212,16 +215,16 @@ namespace RelationshipsTest
     {
         [PKey()]
         [Column()]
-        int id { get; set; }
+        public int id { get; set; }
 
         [Column("imie")]
-        string name { get; set; }
+        public string name { get; set; }
 
         [Column("jakosc_welny")]
-        double woolQuality { get; set; }
+        public double woolQuality { get; set; }
 
         [OneToOne]
-        Label label { get; set; }
+        public Label label { get; set; }
 
 
         public Sheep(int id, string name, double woolQuality, Label label)
@@ -239,10 +242,10 @@ namespace RelationshipsTest
 
         [PKey()]
         [Column("identyfikator")]
-        int id { get; set; }
+        public int id { get; set; }
 
         [Column("nr_owcy")]
-        int nr { get; set; }
+        public int nr { get; set; }
         public Label(int id, int nr)
         {
             this.id = id;

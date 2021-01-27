@@ -8,6 +8,7 @@ namespace Design_Patterns_project
         private string _sqlOperator;
         protected string _field;
         protected Object _value;
+
         public SqlCondition(string _sqlOperator, string field, Object value)
         {
             this._sqlOperator = _sqlOperator;
@@ -30,24 +31,23 @@ namespace Design_Patterns_project
             SqlCondition SqlCondition = new SqlCondition(">", fieldName, value);
             return SqlCondition;
         }
+
         public static SqlCondition LowerThan(string fieldName, Object value)
         {
             SqlCondition SqlCondition = new SqlCondition("<", fieldName, value);
             return SqlCondition;
         }
+
         public static SqlCondition Equals(string fieldName, Object value)
         {
             SqlCondition SqlCondition = new SqlCondition("=", fieldName, value);
             return SqlCondition;
         }
+
         public static SqlCondition NotEquals(string fieldName, Object value)
         {
             SqlCondition SqlCondition = new SqlCondition("!=", fieldName, value);
             return SqlCondition;
         }
-
-
     }
-
-
 }

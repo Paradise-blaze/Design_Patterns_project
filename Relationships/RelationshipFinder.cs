@@ -33,6 +33,7 @@ namespace Design_Patterns_project.Relationships
 
             return oneToOneRelationships;
         }
+
         public List<Relationship> FindOneToOne(Object instance)
         {
             return FindRelationship(instance, RelationshipKind.OneToOne);
