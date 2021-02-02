@@ -15,8 +15,8 @@ namespace ConcreteTableInheritanceTest
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest"
 
-            DataManager vehicleManager = new DataManager("LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest");
-            //DataManager vehicleManager = new DataManager("DESKTOP-HVUO0CP", "ConcreteTableInheritanceTest");
+            //DataManager vehicleManager = new DataManager("LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest");
+            DataManager vehicleManager = new DataManager("DESKTOP-HVUO0CP", "ConcreteTableInheritanceTest");
 
             FourWheeledVehicle car1 = new FourWheeledVehicle(1, 250.21, 8.12);
             FourWheeledVehicle car2 = new FourWheeledVehicle(2, 245.15, 7.91);

@@ -43,6 +43,10 @@ namespace Design_Patterns_project
             }
             else
             {
+                if (tableAttribute._tableName == null)
+                {
+                    return objectType.Name;
+                }
                 return tableAttribute._tableName;
             }
         }

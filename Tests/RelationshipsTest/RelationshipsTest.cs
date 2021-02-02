@@ -16,8 +16,8 @@ namespace RelationshipsTest
             // szymon -> "LAPTOP-BHF7G1P9", "RelationshipsTest" databases (like tests directories)
             // Blacki7 - > "DESKTOP-BO1NL9H", "test1"  (work in progress)
 
-            DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
-            //DataManager mountainManager = new DataManager("DESKTOP-HVUO0CP", "RelationshipsTest");
+            //DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
+            DataManager mountainManager = new DataManager("DESKTOP-HVUO0CP", "RelationshipsTest");
 
             Flea flea1 = new Flea(1, "Skoczuszka", 42.9);
             Flea flea2 = new Flea(2, "Sokolica", 12.19);
@@ -25,24 +25,32 @@ namespace RelationshipsTest
 
             Bowl bowl = new Bowl(1, "DogFood", 10);
 
-            Dog testDog = new Dog(1, "Burek", 6, bowl);
-
+            Dog testDog = new Dog(1, "Burek", 6);
+            
             testDog.AddFlea(flea1);
             testDog.AddFlea(flea2);
             testDog.AddFlea(flea3);
+
+            testDog.AddBowl(bowl);
 
             Label label1 = new Label(1, 234);
             Label label2 = new Label(2, 235);
             Label label3 = new Label(3, 236);
 
-            Sheep sheep1 = new Sheep(1, "Marcysia", 2.35, label1);
-            Sheep sheep2 = new Sheep(2, "Pola", 1.84, label2);
-            Sheep sheep3 = new Sheep(3, "Hania", 1.27, label3);
+            Sheep sheep1 = new Sheep(1, "Marcysia", 2.35);
+            sheep1.AddLabel(label1);
+
+            Sheep sheep2 = new Sheep(2, "Pola", 1.84);
+            sheep2.AddLabel(label2);
+
+            Sheep sheep3 = new Sheep(3, "Hania", 1.27);
+            sheep3.AddLabel(label3);
 
             Alp alp1 = new Alp(1, "Rozlegla dolina", 5.61);
             Alp alp2 = new Alp(2, "Gorska tajemnica", 7.42);
 
-            Shepherd testShepherd = new Shepherd(1, "Franek", testDog);
+            Shepherd testShepherd = new Shepherd(1, "Franek");
+            testShepherd.AddDog(testDog);
 
             testShepherd.AddSheep(sheep1);
             testShepherd.AddSheep(sheep2);
@@ -88,14 +96,15 @@ namespace RelationshipsTest
             select2 = mountainManager.Select(typeof(Flea), selectConditions2);
             Console.WriteLine('\n' + select2 + '\n');
 
-            label3 = (Label)mountainManager.SelectById(label3, 3);
-            Console.WriteLine(label3.id);
-            Console.WriteLine(label3.nr);
 
-            sheep2 = (Sheep)mountainManager.SelectById(sheep2, 2);
-            Console.WriteLine(sheep2.id);
-            Console.WriteLine(sheep2.name);
-            Console.WriteLine(sheep2.woolQuality);
+            //Test for relation-object mapping
+            // List<SqlCondition> selectConditions1 = new List<SqlCondition> { SqlCondition.Equals("identyfikator", 1) };
+            // List<object> objects = mountainManager.SelectObjects(typeof(Shepherd), selectConditions1);
+            // foreach (Shepherd item in objects)
+            // {
+            //     Console.WriteLine(item.GetName());
+            //     Console.WriteLine(item.GetId());
+            // }
 
             Console.WriteLine("Utter success");
         }
@@ -106,24 +115,34 @@ namespace RelationshipsTest
     {
         [PKey()]
         [Column("identyfikator")]
-        public int id { get; set; }
+        int id { get; set; }
 
         [Column("imie")]
-        public string name { get; set; }
+        string name { get; set; }
 
         [OneToOne]
         Dog dog { get; set; }
 
         [OneToMany]
-        public List<Sheep> sheep { get; set; } = new List<Sheep>();
+        List<Sheep> sheep { get; set; } = new List<Sheep>();
 
         [ManyToMany]
         List<Alp> alps { get; set; } = new List<Alp>();
 
-        public Shepherd(int id, string name, Dog dog)
+        public int GetId(){
+            return this.id;
+        }
+        public string GetName(){
+            return this.name;
+        }
+        public Shepherd(int id, string name)
         {
             this.id = id;
             this.name = name;
+        }
+
+        public void AddDog(Dog dog)
+        {
             this.dog = dog;
         }
 
@@ -161,12 +180,16 @@ namespace RelationshipsTest
             this.fleas.Add(flea);
         }
 
-        public Dog(int id, string name, double age, Bowl bowl)
+        public void AddBowl(Bowl bowl)
+        {
+            this.bowl = bowl;
+        }
+
+        public Dog(int id, string name, double age)
         {
             this.id = id;
             this.name = name;
             this.age = age;
-            this.bowl = bowl;
         }
     }
 
@@ -220,23 +243,27 @@ namespace RelationshipsTest
     {
         [PKey()]
         [Column()]
-        public int id { get; set; }
+        int id { get; set; }
 
         [Column("imie")]
-        public string name { get; set; }
+        string name { get; set; }
 
         [Column("jakosc_welny")]
-        public double woolQuality { get; set; }
+        double woolQuality { get; set; }
 
         [OneToOne]
-        public Label label { get; set; }
+        Label label { get; set; }
 
-        public Sheep(int id, string name, double woolQuality, Label label)
+        public void AddLabel(Label label)
+        {
+            this.label = label;
+        }
+
+        public Sheep(int id, string name, double woolQuality)
         {
             this.id = id;
             this.name = name;
             this.woolQuality = woolQuality;
-            this.label = label;
         }
     }
 
@@ -246,10 +273,10 @@ namespace RelationshipsTest
 
         [PKey()]
         [Column("identyfikator")]
-        public int id { get; set; }
+        int id { get; set; }
 
         [Column("nr_owcy")]
-        public int nr { get; set; }
+        int nr { get; set; }
         public Label(int id, int nr)
         {
             this.id = id;
