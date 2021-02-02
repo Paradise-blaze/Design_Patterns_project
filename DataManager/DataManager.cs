@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
-using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections;
 using System.Reflection;
@@ -65,10 +64,10 @@ namespace Design_Patterns_project
             PerformQuery(query);
 
             // foreign key mapping
-            List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(instance);
-            List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(instance);
+            List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(instance.GetType());
+            List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(instance.GetType());
             // association table mapping
-            List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(instance);
+            List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(instance.GetType());
 
             if (oneToOne.Count != 0)
             {
@@ -141,7 +140,7 @@ namespace Design_Patterns_project
             PerformQuery(query);
         }
 
-        public string Select(Type type, List<SqlCondition> listOfSqlCondition)
+        public string SelectAsString(Type type, List<SqlCondition> listOfSqlCondition)
         {
             string tableName = _dataMapper.GetTableName(type);
 
@@ -157,68 +156,181 @@ namespace Design_Patterns_project
             return selectQueryOutput;
         }
 
+        public List<Object> Select(Type type, List<SqlCondition> listOfSqlCondition)
+        {
+            _msSqlConnection.ConnectAndOpen();
+            List<Object> result = SelectWithOpenConnection(type, listOfSqlCondition);
+            _msSqlConnection.Dispose();
 
-        public List<object> SelectObjects(Type type, List<SqlCondition> listOfSqlCondition){
+            return result;
+        }
 
-            List<object> selectedObjects = new List<object>{};
 
+        private List<Object> SelectWithOpenConnection(Type type, List<SqlCondition> listOfSqlCondition)
+        {
+            List<Object> selectedObjects = new List<Object> {};
             string tableName = _dataMapper.GetTableName(type);
 
-            // if (!_msSqlConnection.CheckIfTableExists(tableName))
-            // {
-            //     Type rootHierarchyType = _tableInheritance.GetMainType(type);
-            //     tableName = _dataMapper.GetTableName(rootHierarchyType);
-            // }
+            if (!_msSqlConnection.CheckIfTableExists(tableName))
+            {
+                Type rootHierarchyType = _tableInheritance.GetMainType(type);
+                tableName = _dataMapper.GetTableName(rootHierarchyType);
+            }
 
             string selectQuery = _queryBuilder.CreateSelectQuery(tableName, listOfSqlCondition);
- 
-            SqlDataReader dataReader = _msSqlConnection.ExecuteObjectSelect(selectQuery, tableName);
-
+            SqlDataReader dataReader = _msSqlConnection.ExecuteObjectSelect(selectQuery);
             
             while(dataReader.Read())
             {
-                IDataRecord records = (IDataRecord)dataReader;
-                object[] parameters = FetchDataFromRecord(records);
-                Object o = Activator.CreateInstance(type,parameters);
+                IDataRecord record = (IDataRecord)dataReader;
+                Object[] parameters = FetchDataFromRecord(type, record);
+                Object o = Activator.CreateInstance(type, parameters);
                 selectedObjects.Add(o);
             }
 
             dataReader.Close();
-            _msSqlConnection.Dispose();
+
+            List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(type);
+            List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(type);
+            List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(type);
+
+            foreach (var obj in selectedObjects)
+            {
+                foreach (var relationship in oneToOne)
+                {
+                    PropertyInfo property = relationship._secondMember;
+                    Type childType = property.PropertyType;
+                    string primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(type);
+                    var primaryKey = _dataMapper.FindPrimaryKey(obj);
+                    List<SqlCondition> condition = new List<SqlCondition> { SqlCondition.Equals(tableName+primaryKeyName, primaryKey) };
+                    List<Object> children = SelectWithOpenConnection(childType, condition);
+                    Object child = null;
+
+                    if (children.Count() != 0)
+                    {
+                        child = children[0];
+                    }
+
+                    property.SetValue(obj, child, null);
+                }
+
+                foreach (var relationship in oneToMany)
+                {
+                    PropertyInfo property = relationship._secondMember;
+                    Type childType = property.PropertyType.GetGenericArguments()[0];
+                    string primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(type);
+                    var primaryKey = _dataMapper.FindPrimaryKey(obj);
+                    List<SqlCondition> condition = new List<SqlCondition> { SqlCondition.Equals(tableName + primaryKeyName, primaryKey) };
+                    List<Object> children = SelectWithOpenConnection(childType, condition);
+
+                    IList childTmp = children as IList;
+                    IList list = Activator.CreateInstance(property.PropertyType) as IList;
+                    
+                    foreach (var it in childTmp)
+                    {
+                        list.Add(it);
+                    }
+
+                    property.SetValue(obj, list, null);
+                }
+
+                foreach (var relationship in manyToMany)
+                {
+                    PropertyInfo property = relationship._secondMember;
+                    Type childType = property.PropertyType.GetGenericArguments()[0];
+                    string childTableName = _dataMapper.GetTableName(childType);
+                    string childPrimaryKeyName = _dataMapper.FindPrimaryKeyFieldName(type);
+                    string primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(type);
+                    var primaryKey = _dataMapper.FindPrimaryKey(obj);
+
+                    string associationTable = GetMergedNames(tableName, childTableName);
+                    List<Object> childPrimaryKeys = SelectFromAssociationTable(associationTable, tableName + primaryKeyName, primaryKey);
+                    List<Object> children = new List<object>();
+
+                    foreach(var childPK in childPrimaryKeys)
+                    {
+                        List<SqlCondition> condition = new List<SqlCondition> { SqlCondition.Equals(childPrimaryKeyName, childPK) };
+                        Object child = SelectWithOpenConnection(childType, condition)[0];
+                        children.Add(child);
+                    }
+
+                    IList childTmp = children as IList;
+                    IList list = Activator.CreateInstance(property.PropertyType) as IList;
+
+                    foreach (var it in childTmp)
+                    {
+                        list.Add(it);
+                    }
+
+                    property.SetValue(obj, list, null);
+                }
+            }
 
             return selectedObjects;
         }
 
-        private object[] FetchDataFromRecord(IDataRecord record)
+        private Object[] FetchDataFromRecord(Type type, IDataRecord record)
         {
-            object[] parameters = new object[record.FieldCount];
+            ConstructorInfo constructor = type.GetConstructors()[0];
+            Dictionary<string, Object> columnsAndValues = _dataMapper.CreateDictionaryFromRecord(record);
+            IEnumerable<string> parameterNames = (new List<ParameterInfo>(constructor.GetParameters()).Select(x => x.Name));
+            PropertyInfo[] properties = DataMapper.GetTypeAllProperties(type);
+            Object[] parameters = new Object[parameterNames.Count()];
 
-            for (int i = 0; i < record.FieldCount; i++)
+            foreach (var property in properties)
             {
-                parameters[i] = record[i];
+                string columnName;
+                ColumnAttribute columnAttribute = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
+
+                if (columnAttribute == null)
+                {
+                    continue;
+                }
+
+                if (columnAttribute._columnName == null)
+                {
+                    columnName = property.Name;
+                }
+                else
+                {
+                    columnName = columnAttribute._columnName;
+                }
+
+                if (columnsAndValues.ContainsKey(columnName))
+                {
+                    int index = parameterNames.ToList().IndexOf(property.Name);
+                    parameters[index] = columnsAndValues[columnName];
+                }
             }
             
             return parameters;
         }
 
-
-        public object SelectById(Object obj, object primaryKey)
+        private List<Object> SelectFromAssociationTable(string tableName, string primaryKeyName, Object primaryKey)
         {
-            string tableName = _dataMapper.GetTableName(obj.GetType());
-            string primaryKeyName = _dataMapper.FindPrimaryKeyFieldName(obj.GetType());
+            List<Object> selectedObjects = new List<Object> { };
+            Console.WriteLine(primaryKey);
+            List<SqlCondition> listOfSqlCondition = new List<SqlCondition>{ SqlCondition.Equals(primaryKeyName, primaryKey) };
+            string selectQuery = _queryBuilder.CreateSelectQuery(tableName, listOfSqlCondition);
+            SqlDataReader dataReader = _msSqlConnection.ExecuteObjectSelect(selectQuery);
 
-            List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.Equals(primaryKeyName, primaryKey) };
-            String query = _queryBuilder.CreateSelectQuery(tableName, conditions);
+            while(dataReader.Read())
+            {
+                IDataRecord record = (IDataRecord)dataReader;
 
-            _msSqlConnection.ConnectAndOpen();
+                if (record.GetName(0) == primaryKeyName)
+                {
+                    selectedObjects.Add(record[1]);
+                }
+                else
+                {
+                    selectedObjects.Add(record[0]);
+                }
+            }
 
-            SqlCommand command = new SqlCommand(query, _msSqlConnection.GetConnection());
-            SqlDataReader reader = command.ExecuteReader();
-            Object mappedObject = _dataMapper.MapTableIntoObject(obj, reader);
+            dataReader.Close();
 
-            _msSqlConnection.Dispose();
-
-            return mappedObject;
+            return selectedObjects;
         }
 
         public void Insert(Object obj, Tuple<string, object> parentKey = null)
@@ -258,9 +370,9 @@ namespace Design_Patterns_project
                 }
 
                 // relationships lists
-                List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(obj);
-                List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(obj);
-                List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(obj);
+                List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(obj.GetType());
+                List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(obj.GetType());
+                List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(obj.GetType());
 
                 string insertQuery;
 
@@ -318,19 +430,27 @@ namespace Design_Patterns_project
                         foreach (var item in secondMemberObjectList)
                         {
                             Object secondMemberKey = _dataMapper.FindPrimaryKey(item);
-                            Object secondMemberKeyName = _dataMapper.FindPrimaryKeyFieldName(item.GetType());
+                            string secondMemberKeyName = _dataMapper.FindPrimaryKeyFieldName(item.GetType());
                             string secondMemberTableName = _dataMapper.GetTableName(item.GetType());
 
                             Insert(item);
 
                             Tuple<string, object> oneTableKey = new Tuple<string, object>(tableName + primaryKeyName, primaryKey);
                             Tuple<string, object> secondTableKey = new Tuple<string, object>(secondMemberTableName + secondMemberKeyName, secondMemberKey);
-                            List<Tuple<string, object>> keysAndValues = new List<Tuple<string, object>> { oneTableKey, secondTableKey };
-
                             string associationTableName = GetMergedNames((string)tableName, (string)secondMemberTableName);
-                            string intoAssocTableInsertQuery = _queryBuilder.CreateInsertQuery(associationTableName, keysAndValues);
 
-                            PerformQuery(intoAssocTableInsertQuery);
+                            _msSqlConnection.ConnectAndOpen();
+                            List<Object> valuesFromAssociationTable = SelectFromAssociationTable(associationTableName, secondMemberTableName + secondMemberKeyName, secondMemberKey); ;
+                            _msSqlConnection.Dispose();
+
+                            if (!valuesFromAssociationTable.Contains(primaryKey))
+                            {
+                                List<Tuple<string, object>> keysAndValues = new List<Tuple<string, object>> { oneTableKey, secondTableKey };
+
+                                string intoAssocTableInsertQuery = _queryBuilder.CreateInsertQuery(associationTableName, keysAndValues);
+
+                                PerformQuery(intoAssocTableInsertQuery);
+                            }
                         }
                     }
                 }

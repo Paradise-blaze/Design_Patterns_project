@@ -15,8 +15,8 @@ namespace ConcreteTableInheritanceTest
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest"
 
-            //DataManager vehicleManager = new DataManager("LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest");
-            DataManager vehicleManager = new DataManager("DESKTOP-HVUO0CP", "ConcreteTableInheritanceTest");
+            DataManager vehicleManager = new DataManager("LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest");
+            //DataManager vehicleManager = new DataManager("DESKTOP-HVUO0CP", "ConcreteTableInheritanceTest");
 
             FourWheeledVehicle car1 = new FourWheeledVehicle(1, 250.21, 8.12);
             FourWheeledVehicle car2 = new FourWheeledVehicle(2, 245.15, 7.91);
@@ -53,7 +53,7 @@ namespace ConcreteTableInheritanceTest
 
             //select
             List<SqlCondition> selectConditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
-            string select = vehicleManager.Select(typeof(TwoWheeledVehicle), selectConditions);
+            string select = vehicleManager.SelectAsString(typeof(TwoWheeledVehicle), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
             //delete
@@ -62,7 +62,7 @@ namespace ConcreteTableInheritanceTest
             vehicleManager.Delete(motorbike2);
 
             //select
-            select = vehicleManager.Select(typeof(TwoWheeledVehicle), selectConditions);
+            select = vehicleManager.SelectAsString(typeof(TwoWheeledVehicle), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
             //update
@@ -71,13 +71,23 @@ namespace ConcreteTableInheritanceTest
             vehicleManager.Update(typeof(TwoWheeledVehicle), valuesToSet, updateConditions);
 
             //select
-            select = vehicleManager.Select(typeof(TwoWheeledVehicle), selectConditions);
+            select = vehicleManager.SelectAsString(typeof(TwoWheeledVehicle), selectConditions);
             Console.WriteLine('\n' + select + '\n');
+
+            //Test for relation-object mapping
+            List<SqlCondition> selectVehicleConditions = new List<SqlCondition> { SqlCondition.Equals("id", 2) };
+            List<Object> objects = vehicleManager.Select(typeof(FourWheeledVehicle), selectVehicleConditions);
+            FourWheeledVehicle newVehicle = (FourWheeledVehicle)objects[0];
+
+            Console.WriteLine(newVehicle.GetId());
+            Console.WriteLine(newVehicle.GetVelocity());
+            Console.WriteLine(newVehicle.GetSize());
 
             Console.WriteLine("Utter success");
         }
     }
 
+    [Table()]
     class Vehicle
     {
         [PKey()]
@@ -92,8 +102,19 @@ namespace ConcreteTableInheritanceTest
             this.id = id;
             this.velocity = velocity;
         }
+
+        public int GetId()
+        {
+            return this.id;
+        }
+
+        public double GetVelocity()
+        {
+            return this.velocity;
+        }
     }
 
+    [Table()]
     class FourWheeledVehicle : Vehicle
     {
         [Column()]
@@ -103,8 +124,14 @@ namespace ConcreteTableInheritanceTest
         {
             this.size = size;
         }
+
+        public double GetSize()
+        {
+            return this.size;
+        }
     }
 
+    [Table()]
     class TwoWheeledVehicle : Vehicle
     {
         [Column()]

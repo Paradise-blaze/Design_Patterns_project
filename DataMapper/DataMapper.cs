@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Data.SqlClient;
-using System.Collections;
+using System.Data;
 using System.Linq;
 using Design_Patterns_project.Attributes;
 
@@ -205,59 +204,16 @@ namespace Design_Patterns_project
             return null;
         }
 
-        public Dictionary<string, Object> CreateDictionaryFromTable(SqlDataReader reader)
+        public Dictionary<string, Object> CreateDictionaryFromRecord(IDataRecord record)
         {
             Dictionary<string, Object> columnNamesAndTheirValues = new Dictionary<string, Object>();
 
-            while (reader.Read())
+            for (int i = 0; i < record.FieldCount; i++)
             {
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    columnNamesAndTheirValues.Add(reader.GetName(i), reader[i]);
-                }
+                columnNamesAndTheirValues.Add(record.GetName(i), record[i]);
             }
 
             return columnNamesAndTheirValues;
-        }
-
-        public Object MapTableIntoObject(Object instance, SqlDataReader reader)
-        {
-            Dictionary<string, Object> columnNamesAndTheirValues = CreateDictionaryFromTable(reader);
-            reader.Close();
-            Type instanceType = instance.GetType();
-            PropertyInfo[] properties = GetTypeProperties(instanceType);
-
-            foreach (PropertyInfo property in properties)
-            {
-                ColumnAttribute columnAttribute = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
-                OneToOneAttribute oneToOneAttribute = (OneToOneAttribute)property.GetCustomAttribute(typeof(OneToOneAttribute), false);
-                OneToManyAttribute oneToManyAttribute = (OneToManyAttribute)property.GetCustomAttribute(typeof(OneToManyAttribute), false);
-                ManyToManyAttribute manyToManyAttribute = (ManyToManyAttribute)property.GetCustomAttribute(typeof(ManyToManyAttribute), false);
-
-                if (columnAttribute == null)
-                {
-                    continue;
-                }
-                
-                if (oneToOneAttribute == null && oneToManyAttribute == null && manyToManyAttribute == null)
-                {
-                    string columnNameInObject;
-
-                    if (columnAttribute._columnName == null)
-                    {
-                        columnNameInObject = property.Name;
-                    }
-                    else
-                    {
-                        columnNameInObject = columnAttribute._columnName;
-                    }
-
-                    var value = columnNamesAndTheirValues[columnNameInObject];
-                    property.SetValue(instance, value, null);
-                }
-            }
-
-            return instance;
         }
     }
 

@@ -56,17 +56,12 @@ namespace Design_Patterns_project.Connection
             return recordString+"\n";
         }
 
-        public SqlDataReader ExecuteObjectSelect(string sqlQuery, string tableName){
-
-            ConnectAndOpen();
+        public SqlDataReader ExecuteObjectSelect(string sqlQuery)
+        {
             SqlCommand command = new SqlCommand(sqlQuery, this._connection);
             SqlDataReader dataReader = command.ExecuteReader();
             return dataReader;
         }
-
-
-
-
 
         // SELECT
         public string ExecuteSelectQuery(string sqlQuery, string tableName){
@@ -135,12 +130,23 @@ namespace Design_Patterns_project.Connection
         }
 
         // Check if table of given name exists
-        public bool CheckIfTableExists(string tableName){
+        public bool CheckIfTableExists(string tableName)
+        {
             string sqlQuery = "SELECT CASE WHEN OBJECT_ID('dbo."+tableName+"', 'U') IS NOT NULL THEN 1 ELSE 0 END;";
             SqlCommand command = new SqlCommand(sqlQuery,this._connection);
-            ConnectAndOpen();
-            int result = (Int32)command.ExecuteScalar();
-            Dispose();
+            int result;
+
+            if (GetConnection().State == ConnectionState.Closed)
+            {
+                ConnectAndOpen();
+                result = (Int32)command.ExecuteScalar();
+                Dispose();
+            }
+            else
+            {
+                result = (Int32)command.ExecuteScalar();
+            }
+
             return (result == 1);
         }
 
