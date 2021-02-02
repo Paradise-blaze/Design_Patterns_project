@@ -56,6 +56,18 @@ namespace Design_Patterns_project.Connection
             return recordString+"\n";
         }
 
+        public SqlDataReader ExecuteObjectSelect(string sqlQuery, string tableName){
+
+            ConnectAndOpen();
+            SqlCommand command = new SqlCommand(sqlQuery, this._connection);
+            SqlDataReader dataReader = command.ExecuteReader();
+            return dataReader;
+        }
+
+
+
+
+
         // SELECT
         public string ExecuteSelectQuery(string sqlQuery, string tableName){
             ConnectAndOpen();

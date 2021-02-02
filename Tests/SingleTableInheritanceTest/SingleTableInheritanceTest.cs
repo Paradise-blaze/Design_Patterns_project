@@ -15,8 +15,8 @@ namespace SingleTableInheritanceTest
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "SingleTableInheritanceTest"
 
-            DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
-            //DataManager mythicalManager = new DataManager("DESKTOP-HVUO0CP", "SingleTableInheritanceTest");
+            //DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
+            DataManager mythicalManager = new DataManager("DESKTOP-HVUO0CP", "SingleTableInheritanceTest");
 
             IceDragon iceDragon1 = new IceDragon(1, 220, "Winter", 15, 20, 35, 50);
             IceDragon iceDragon2 = new IceDragon(8, 210, "Whiter", 19, 22, 37, 51);
@@ -69,9 +69,7 @@ namespace SingleTableInheritanceTest
             Console.WriteLine('\n' + select + '\n');
 
             mythicalCreature1 = (MythicalCreature)mythicalManager.SelectById(mythicalCreature1, 1);
-            Console.WriteLine(mythicalCreature1.id);
-            Console.WriteLine(mythicalCreature1.name);
-            Console.WriteLine(mythicalCreature1.health);
+            
 
             Console.WriteLine("Utter success");
         }
@@ -81,13 +79,13 @@ namespace SingleTableInheritanceTest
     {
         [PKey()]
         [Column()]
-        public int id { get; set; }
+        int id { get; set; }
 
         [Column()]
-        public int health { get; set; }
+        int health { get; set; }
 
         [Column("mythical_name")]
-        public string name { get; set; }
+        string name { get; set; }
 
         public MythicalCreature(int id, int health, string name)
         {
