@@ -15,8 +15,8 @@ namespace ClassTableInheritanceTest
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "ClassTableInheritanceTest"
 
-            //DataManager wizardManager = new DataManager("LAPTOP-BHF7G1P9", "ClassTableInheritanceTest");
-            DataManager wizardManager = new DataManager("DESKTOP-HVUO0CP", "ClassTableInheritanceTest");
+            DataManager wizardManager = new DataManager("LAPTOP-BHF7G1P9", "ClassTableInheritanceTest");
+            //DataManager wizardManager = new DataManager("DESKTOP-HVUO0CP", "ClassTableInheritanceTest");
 
             ArchMage archMage1 = new ArchMage(1, "Gandalf", 1, 2.32, 1, 106);
             ArchMage archMage2 = new ArchMage(1, "Vilgefortz", 1, 2.29, 2, 104);
@@ -49,7 +49,7 @@ namespace ClassTableInheritanceTest
 
             //select
             List<SqlCondition> selectConditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 6) };
-            string select = wizardManager.Select(typeof(ArchMage), selectConditions);
+            string select = wizardManager.SelectAsString(typeof(ArchMage), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
             //delete
@@ -58,7 +58,7 @@ namespace ClassTableInheritanceTest
             wizardManager.Delete("darkMage", conditions);
 
             //select
-            select = wizardManager.Select(typeof(ArchMage), selectConditions);
+            select = wizardManager.SelectAsString(typeof(ArchMage), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
             //update
@@ -67,17 +67,14 @@ namespace ClassTableInheritanceTest
             wizardManager.Update(typeof(ArchMage), valuesToSet, updateConditions);
 
             //select
-            select = wizardManager.Select(typeof(ArchMage), selectConditions);
+            select = wizardManager.SelectAsString(typeof(ArchMage), selectConditions);
             Console.WriteLine('\n'+select+'\n');
-
-            archMage3 = (ArchMage)wizardManager.SelectById(archMage3, 3);
-            Console.WriteLine(archMage3.archMageID);
-            Console.WriteLine(archMage3.yearsOfExperience);
 
             Console.WriteLine("Utter success");
         }
     }
 
+    [Table()]
     class Character
     {
         [PKey()]
@@ -94,6 +91,7 @@ namespace ClassTableInheritanceTest
         }
     }
 
+    [Table()]
     class Mage : Character
     {
         [PKey()]
@@ -110,14 +108,15 @@ namespace ClassTableInheritanceTest
         }
     }
 
+    [Table()]
     class ArchMage : Mage
     {
         [PKey()]
         [Column("id")]
-        public int archMageID { get; set; }
+        int archMageID { get; set; }
 
         [Column("years_of_experience")]
-        public int yearsOfExperience { get; set; }
+        int yearsOfExperience { get; set; }
 
         public ArchMage(int id, string name, int mageID, double spellSkills, int archMageID, int yearsOfExperience)
             : base(id, name, mageID, spellSkills)
@@ -127,6 +126,7 @@ namespace ClassTableInheritanceTest
         }
     }
 
+    [Table()]
     class DarkMage : Mage
     {
         [PKey()]

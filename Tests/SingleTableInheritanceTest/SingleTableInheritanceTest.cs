@@ -15,8 +15,8 @@ namespace SingleTableInheritanceTest
             // maciopelo -> "DESKTOP-HVUO0CP", "TestDB"
             // szymon -> "LAPTOP-BHF7G1P9", "SingleTableInheritanceTest"
 
-            //DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
-            DataManager mythicalManager = new DataManager("DESKTOP-HVUO0CP", "SingleTableInheritanceTest");
+            DataManager mythicalManager = new DataManager("LAPTOP-BHF7G1P9", "SingleTableInheritanceTest");
+            //DataManager mythicalManager = new DataManager("DESKTOP-HVUO0CP", "SingleTableInheritanceTest");
 
             IceDragon iceDragon1 = new IceDragon(1, 220, "Winter", 15, 20, 35, 50);
             IceDragon iceDragon2 = new IceDragon(8, 210, "Whiter", 19, 22, 37, 51);
@@ -47,7 +47,7 @@ namespace SingleTableInheritanceTest
 
             //select
             List<SqlCondition> selectConditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
-            string select = mythicalManager.Select(typeof(MythicalCreature), selectConditions);
+            string select = mythicalManager.SelectAsString(typeof(MythicalCreature), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
             //delete
@@ -56,7 +56,7 @@ namespace SingleTableInheritanceTest
             mythicalManager.Delete(dragon1);
 
             //select
-            select = mythicalManager.Select(typeof(MythicalCreature), selectConditions);
+            select = mythicalManager.SelectAsString(typeof(MythicalCreature), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
             //update
@@ -65,16 +65,27 @@ namespace SingleTableInheritanceTest
             mythicalManager.Update(typeof(MythicalCreature), valuesToSet, updateConditions);
 
             //select
-            select = mythicalManager.Select(typeof(MythicalCreature), selectConditions);
+            select = mythicalManager.SelectAsString(typeof(MythicalCreature), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
-            mythicalCreature1 = (MythicalCreature)mythicalManager.SelectById(mythicalCreature1, 1);
-            
+            //Test for relation-object mapping
+            List<SqlCondition> selectMythicalConditions = new List<SqlCondition> { SqlCondition.Equals("id", 10) };
+            List<Object> objects = mythicalManager.Select(typeof(GoldDragon), selectMythicalConditions);
+            GoldDragon newShepherd = (GoldDragon)objects[0];
+
+            Console.WriteLine(newShepherd.GetId());
+            Console.WriteLine(newShepherd.GetName());
+            Console.WriteLine(newShepherd.GetHealth());
+            Console.WriteLine(newShepherd.GetBlastPower());
+            Console.WriteLine(newShepherd.GetEndurance());
+            Console.WriteLine(newShepherd.GetMineralHunger());
+            Console.WriteLine(newShepherd.GetPreciousness());
 
             Console.WriteLine("Utter success");
         }
     }
 
+    [Table()]
     class MythicalCreature
     {
         [PKey()]
@@ -93,8 +104,24 @@ namespace SingleTableInheritanceTest
             this.health = health;
             this.name = name;
         }
+
+        public int GetId()
+        {
+            return this.id;
+        }
+
+        public int GetHealth()
+        {
+            return this.health;
+        }
+
+        public string GetName()
+        {
+            return this.name;
+        }
     }
 
+    [Table()]
     class Dragon : MythicalCreature
     {
         [Column("blast_power")]
@@ -108,8 +135,19 @@ namespace SingleTableInheritanceTest
             this.blastPower = blastPower;
             this.endurance = endurance;
         }
+
+        public int GetBlastPower()
+        {
+            return this.blastPower;
+        }
+
+        public int GetEndurance()
+        {
+            return this.endurance;
+        }
     }
 
+    [Table()]
     class GoldDragon : Dragon
     {
         [Column("mineral_hunger")]
@@ -118,14 +156,24 @@ namespace SingleTableInheritanceTest
         [Column()]
         double preciousness { get; set; }
 
-        public GoldDragon(int id, int health, string name, int fireCapacity, int endurance, int mineralHunger, double preciousness)
-            : base(id, health, name, fireCapacity, endurance)
+        public GoldDragon(int id, int health, string name, int blastPower, int endurance, int mineralHunger, double preciousness)
+            : base(id, health, name, blastPower, endurance)
         {
             this.mineralHunger = mineralHunger;
             this.preciousness = preciousness;
         }
+
+        public int GetMineralHunger()
+        {
+            return this.mineralHunger;
+        }
+        public double GetPreciousness()
+        {
+            return this.preciousness;
+        }
     }
 
+    [Table()]
     class IceDragon : Dragon
     {
         [Column("time_freeze")]

@@ -7,10 +7,10 @@ namespace Design_Patterns_project.Relationships
 {
     class RelationshipFinder
     {
-        private List<Relationship> FindRelationship(Object instance, RelationshipKind kind)
+        private List<Relationship> FindRelationship(Type instanceType, RelationshipKind kind)
         {
             List<Relationship> oneToOneRelationships = new List<Relationship>();
-            PropertyInfo[] propertiesArray = DataMapper.GetTypeProperties(instance.GetType());
+            PropertyInfo[] propertiesArray = DataMapper.GetTypeProperties(instanceType);
 
             Type attr = kind switch
             {
@@ -26,7 +26,7 @@ namespace Design_Patterns_project.Relationships
 
                 if (attributes.Length != 0)
                 {
-                    Relationship oneToOneRelationship = new Relationship(instance, property, kind);
+                    Relationship oneToOneRelationship = new Relationship(instanceType, property, kind);
                     oneToOneRelationships.Add(oneToOneRelationship);
                 }
             }
@@ -34,19 +34,19 @@ namespace Design_Patterns_project.Relationships
             return oneToOneRelationships;
         }
 
-        public List<Relationship> FindOneToOne(Object instance)
+        public List<Relationship> FindOneToOne(Type instanceType)
         {
-            return FindRelationship(instance, RelationshipKind.OneToOne);
+            return FindRelationship(instanceType, RelationshipKind.OneToOne);
         }
 
-        public List<Relationship> FindOneToMany(Object instance)
+        public List<Relationship> FindOneToMany(Type instanceType)
         {
-            return FindRelationship(instance, RelationshipKind.OneToMany);
+            return FindRelationship(instanceType, RelationshipKind.OneToMany);
         }
 
-        public List<Relationship> FindManyToMany(Object instance)
+        public List<Relationship> FindManyToMany(Type instanceType)
         {
-            return FindRelationship(instance, RelationshipKind.ManyToMany);
+            return FindRelationship(instanceType, RelationshipKind.ManyToMany);
         }
     }
 }
