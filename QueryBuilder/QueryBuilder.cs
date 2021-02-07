@@ -90,7 +90,7 @@ namespace Design_Patterns_project.SqlCommands
             {
                 foreach (var pair in tablesAndForeignKeys)
                 {
-                    returnQuery += pair.Key + pair.Value.Item1 + " " + CsTypesToSql[pair.Value.Item2.GetType()] + " FOREIGN KEY REFERENCES " + pair.Key + "(" + pair.Value.Item1 + ") ,";
+                    returnQuery += pair.Key +"_"+ pair.Value.Item1 + " " + CsTypesToSql[pair.Value.Item2.GetType()] + " FOREIGN KEY REFERENCES " + pair.Key + "(" + pair.Value.Item1 + ") ,";
                 }
             }
 
@@ -98,6 +98,25 @@ namespace Design_Patterns_project.SqlCommands
             returnQuery += ") END;";
 
             return returnQuery;
+        }
+
+        public string CreateAddForeignKeyQuery(string tableName, string columnName, string foreignKeyName, string foreignTable){
+
+            string query = @"ALTER TABLE " + tableName + 
+            " ADD FOREIGN KEY " + "(" + columnName + ")" +
+            " REFERENCES " + foreignTable + "(" + foreignKeyName + ");";
+
+            return query;
+        }
+
+        public string CreateAddColumnQuery(string tableName, string columnName, Type type){
+
+            string query = @"ALTER TABLE " + tableName + 
+            " ADD " + columnName + 
+            " " + CsTypesToSql[type] + ";";
+
+            return query;
+
         }
 
         public string CreateUpdateQuery(string tableName, List<Tuple<string, object>> valuesToSet, List<SqlCondition> SqlCondition)

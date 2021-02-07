@@ -50,6 +50,8 @@ namespace Design_Patterns_project
             }
         }
 
+       
+
         public List<Tuple<string, Object>> GetColumnsAndValues(Object instance, bool isInherited = false)
         {
             List<Tuple<string, Object>> list = new List<Tuple<string, Object>> { };

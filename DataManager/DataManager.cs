@@ -34,7 +34,22 @@ namespace Design_Patterns_project
 
         private string GetMergedNames(string name1, string name2)
         {
-            return string.Compare(name1, name2) < 0 ? name1 + name2 : name2 + name1;
+            return string.Compare(name1, name2) < 0 ? name1 +"_"+ name2 : name2 +"_"+ name1;
+        }
+
+
+        private void AddForeignKey(Object mainInstance, Object childInstance){
+
+            string mainTableName = _dataMapper.GetTableName(mainInstance.GetType());
+            string childTableName = _dataMapper.GetTableName(childInstance.GetType());
+            string childPrimaryKeyName = _dataMapper.FindPrimaryKeyFieldName(childInstance.GetType());
+            string columnName = childTableName +"_"+ childPrimaryKeyName;
+            Object childPrimaryKey = _dataMapper.FindPrimaryKey(childInstance);
+            string addColumnQuery =  _queryBuilder.CreateAddColumnQuery(mainTableName,columnName,childPrimaryKey.GetType());
+            string foreignKeyQuery = _queryBuilder.CreateAddForeignKeyQuery(mainTableName,columnName,childPrimaryKeyName,childTableName);
+            PerformQuery(addColumnQuery);
+            PerformQuery(foreignKeyQuery);
+
         }
 
         public void CreateTable(Object instance)
@@ -66,6 +81,7 @@ namespace Design_Patterns_project
             // foreign key mapping
             List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(instance.GetType());
             List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(instance.GetType());
+
             // association table mapping
             List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(instance.GetType());
 
@@ -76,7 +92,9 @@ namespace Design_Patterns_project
                     PropertyInfo property = relation._secondMember;
                     MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
                     Object value = strGetter.Invoke(instance, null);
-                    CreateTable(value, tableName, primaryKeyName);
+                    CreateTable(value);
+                    AddForeignKey(instance,value);
+
                 }
             }
 
@@ -340,7 +358,7 @@ namespace Design_Patterns_project
                 string tableName = _dataMapper.GetTableName(obj.GetType());
                 List<Tuple<string, object>> columnsAndValuesList;
                 object primaryKey;
-                object primaryKeyName;
+                string primaryKeyName;
 
                 if (_msSqlConnection.CheckIfTableExists(tableName))
                 {
@@ -394,12 +412,24 @@ namespace Design_Patterns_project
                     {
                         PropertyInfo propertyObj = relation._secondMember;
                         MethodInfo getter = propertyObj.GetGetMethod(nonPublic: true);
-                        Object secondMemberObject = getter.Invoke(obj, null);
-                        Tuple<string, object> parentKeyTuple = new Tuple<string, object>(tableName + (string)primaryKeyName, primaryKey);
+                        Object child = getter.Invoke(obj, null);
+                        Object childPrimaryKey = _dataMapper.FindPrimaryKey(child);
+                        string childPrimaryKeyName = _dataMapper.FindPrimaryKeyFieldName(child.GetType());
+                        string childTableName = _dataMapper.GetTableName(child.GetType());
+                        
 
-                        Insert(secondMemberObject, parentKeyTuple);
+                        List<Tuple<string, object>> valuesToSet = new List<Tuple<string, object>> 
+                        {new Tuple<string,object>(childTableName+"_"+childPrimaryKeyName, childPrimaryKey)};
+
+                        List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.Equals(primaryKeyName, primaryKey) };
+
+                        Insert(child);
+                        Update(obj.GetType(),valuesToSet,updateConditions);
+                        
                     }
                 }
+
+                
 
                 if (oneToMany.Count != 0)
                 {
@@ -407,12 +437,12 @@ namespace Design_Patterns_project
                     {
                         PropertyInfo propertyObj = relation._secondMember;
                         MethodInfo getter = propertyObj.GetGetMethod(nonPublic: true);
-                        Object secondMemberObject = getter.Invoke(obj, null);
-                        IList secondMemberObjectList = secondMemberObject as IList;
+                        Object child = getter.Invoke(obj, null);
+                        IList childList = child as IList;
 
-                        foreach (var item in secondMemberObjectList)
+                        foreach (var item in childList)
                         {
-                            Tuple<string, object> parentKeyTuple = new Tuple<string, object>(tableName + (string)primaryKeyName, primaryKey);
+                            Tuple<string, object> parentKeyTuple = new Tuple<string, object>(tableName +"_"+ (string)primaryKeyName, primaryKey);
                             Insert(item, parentKeyTuple);
                         }
                     }
@@ -424,23 +454,23 @@ namespace Design_Patterns_project
                     {
                         PropertyInfo propertyObj = relation._secondMember;
                         MethodInfo getter = propertyObj.GetGetMethod(nonPublic: true);
-                        Object secondMemberObject = getter.Invoke(obj, null);
-                        IList secondMemberObjectList = secondMemberObject as IList;
+                        Object child = getter.Invoke(obj, null);
+                        IList childList = child as IList;
 
-                        foreach (var item in secondMemberObjectList)
+                        foreach (var item in childList)
                         {
                             Object secondMemberKey = _dataMapper.FindPrimaryKey(item);
                             string secondMemberKeyName = _dataMapper.FindPrimaryKeyFieldName(item.GetType());
-                            string secondMemberTableName = _dataMapper.GetTableName(item.GetType());
+                            string childTableName = _dataMapper.GetTableName(item.GetType());
 
                             Insert(item);
 
-                            Tuple<string, object> oneTableKey = new Tuple<string, object>(tableName + primaryKeyName, primaryKey);
-                            Tuple<string, object> secondTableKey = new Tuple<string, object>(secondMemberTableName + secondMemberKeyName, secondMemberKey);
-                            string associationTableName = GetMergedNames((string)tableName, (string)secondMemberTableName);
+                            Tuple<string, object> oneTableKey = new Tuple<string, object>(tableName +"_"+ primaryKeyName, primaryKey);
+                            Tuple<string, object> secondTableKey = new Tuple<string, object>(childTableName +"_"+ secondMemberKeyName, secondMemberKey);
+                            string associationTableName = GetMergedNames((string)tableName, (string)childTableName);
 
                             _msSqlConnection.ConnectAndOpen();
-                            List<Object> valuesFromAssociationTable = SelectFromAssociationTable(associationTableName, secondMemberTableName + secondMemberKeyName, secondMemberKey); ;
+                            List<Object> valuesFromAssociationTable = SelectFromAssociationTable(associationTableName, childTableName +"_"+ secondMemberKeyName, secondMemberKey); ;
                             _msSqlConnection.Dispose();
 
                             if (!valuesFromAssociationTable.Contains(primaryKey))
