@@ -16,8 +16,8 @@ namespace RelationshipsTest
             // szymon -> "LAPTOP-BHF7G1P9", "RelationshipsTest" databases (like tests directories)
             // Blacki7 - > "DESKTOP-BO1NL9H", "test1"  (work in progress)
 
-            DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
-            //DataManager mountainManager = new DataManager("DESKTOP-HVUO0CP", "RelationshipsTest");
+            //DataManager mountainManager = new DataManager("LAPTOP-BHF7G1P9", "RelationshipsTest");
+            DataManager mountainManager = new DataManager("DESKTOP-HVUO0CP", "RelationshipsTest");
 
             Flea flea1 = new Flea(1, "Skoczuszka", 42.9);
             Flea flea2 = new Flea(2, "Sokolica", 12.19);
@@ -63,107 +63,107 @@ namespace RelationshipsTest
             mountainManager.CreateTable(testShepherd);
             mountainManager.Insert(testShepherd);
 
-            //select
-            List<SqlCondition> selectConditions1 = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
-            string select1 = mountainManager.SelectAsString(typeof(Sheep), selectConditions1);
-            Console.WriteLine('\n' + select1 + '\n');
+            // //select
+            // List<SqlCondition> selectConditions1 = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
+            // string select1 = mountainManager.SelectAsString(typeof(Sheep), selectConditions1);
+            // Console.WriteLine('\n' + select1 + '\n');
 
-            List<SqlCondition> selectConditions2 = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
-            string select2 = mountainManager.SelectAsString(typeof(Flea), selectConditions2);
-            Console.WriteLine('\n' + select2 + '\n');
+            // List<SqlCondition> selectConditions2 = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
+            // string select2 = mountainManager.SelectAsString(typeof(Flea), selectConditions2);
+            // Console.WriteLine('\n' + select2 + '\n');
 
-            //delete
-            mountainManager.Delete(flea3);
-            List<SqlCondition> deleteConditions = new List<SqlCondition> { SqlCondition.LowerThan("nr_owcy", 236) };
-            mountainManager.Delete("znacznik", deleteConditions);
+            // //delete
+            // mountainManager.Delete(flea3);
+            // List<SqlCondition> deleteConditions = new List<SqlCondition> { SqlCondition.LowerThan("nr_owcy", 236) };
+            // mountainManager.Delete("znacznik", deleteConditions);
 
-            //select
-            select1 = mountainManager.SelectAsString(typeof(Sheep), selectConditions1);
-            Console.WriteLine('\n' + select1 + '\n');
+            // //select
+            // select1 = mountainManager.SelectAsString(typeof(Sheep), selectConditions1);
+            // Console.WriteLine('\n' + select1 + '\n');
 
-            select2 = mountainManager.SelectAsString(typeof(Flea), selectConditions2);
-            Console.WriteLine('\n' + select2 + '\n');
+            // select2 = mountainManager.SelectAsString(typeof(Flea), selectConditions2);
+            // Console.WriteLine('\n' + select2 + '\n');
 
-            //update
-            List<Tuple<string, object>> valuesToSet = new List<Tuple<string, object>> {new Tuple<string,object>("jakosc_welny",1.5)};
-            List<SqlCondition> updateConditions = new List<SqlCondition> {SqlCondition.GreaterThan("jakosc_welny",1.25)};
-            mountainManager.Update(typeof(Sheep), valuesToSet, updateConditions);
+            // //update
+            // List<Tuple<string, object>> valuesToSet = new List<Tuple<string, object>> {new Tuple<string,object>("jakosc_welny",1.5)};
+            // List<SqlCondition> updateConditions = new List<SqlCondition> {SqlCondition.GreaterThan("jakosc_welny",1.25)};
+            // mountainManager.Update(typeof(Sheep), valuesToSet, updateConditions);
 
-            //select
-            select1 = mountainManager.SelectAsString(typeof(Sheep), selectConditions1);
-            Console.WriteLine('\n' + select1 + '\n');
+            // //select
+            // select1 = mountainManager.SelectAsString(typeof(Sheep), selectConditions1);
+            // Console.WriteLine('\n' + select1 + '\n');
 
-            select2 = mountainManager.SelectAsString(typeof(Flea), selectConditions2);
-            Console.WriteLine('\n' + select2 + '\n');
+            // select2 = mountainManager.SelectAsString(typeof(Flea), selectConditions2);
+            // Console.WriteLine('\n' + select2 + '\n');
 
-            //Test for relation-object mapping
-            List<SqlCondition> selectShepherdConditions = new List<SqlCondition> { SqlCondition.Equals("identyfikator", 1) };
-            List<Object> objects = mountainManager.Select(typeof(Shepherd), selectShepherdConditions);
-            Shepherd newShepherd = (Shepherd)objects[0];
+            // //Test for relation-object mapping
+            // List<SqlCondition> selectShepherdConditions = new List<SqlCondition> { SqlCondition.Equals("identyfikator", 1) };
+            // List<Object> objects = mountainManager.Select(typeof(Shepherd), selectShepherdConditions);
+            // Shepherd newShepherd = (Shepherd)objects[0];
 
-            Console.WriteLine("New shepherd");
-            Console.WriteLine("   name: {0}", newShepherd.GetName());
-            Console.WriteLine("   id: {0}", newShepherd.GetId());
-            Console.WriteLine("   New dog");
-            Console.WriteLine("      id: {0}", newShepherd.GetDog().GetId());
-            Console.WriteLine("      name: {0}", newShepherd.GetDog().GetName());
-            Console.WriteLine("      age: {0}", newShepherd.GetDog().GetAge());
-            Console.WriteLine("      New bowl");
-            Console.WriteLine("         id: {0}", newShepherd.GetDog().GetBowl().GetId());
-            Console.WriteLine("         mark: {0}", newShepherd.GetDog().GetBowl().GetMark());
-            Console.WriteLine("         size: {0}", newShepherd.GetDog().GetBowl().GetSize());
+            // Console.WriteLine("New shepherd");
+            // Console.WriteLine("   name: {0}", newShepherd.GetName());
+            // Console.WriteLine("   id: {0}", newShepherd.GetId());
+            // Console.WriteLine("   New dog");
+            // Console.WriteLine("      id: {0}", newShepherd.GetDog().GetId());
+            // Console.WriteLine("      name: {0}", newShepherd.GetDog().GetName());
+            // Console.WriteLine("      age: {0}", newShepherd.GetDog().GetAge());
+            // Console.WriteLine("      New bowl");
+            // Console.WriteLine("         id: {0}", newShepherd.GetDog().GetBowl().GetId());
+            // Console.WriteLine("         mark: {0}", newShepherd.GetDog().GetBowl().GetMark());
+            // Console.WriteLine("         size: {0}", newShepherd.GetDog().GetBowl().GetSize());
 
-            Console.WriteLine("      New fleas");
+            // Console.WriteLine("      New fleas");
 
-            foreach (Flea flea in newShepherd.GetDog().GetFleas())
-            {
-                Console.WriteLine("      flea");
-                Console.WriteLine("         id: {0}", flea.GetId());
-                Console.WriteLine("         nick: {0}", flea.GetNick());
-                Console.WriteLine("         jump level: {0}", flea.GetJumpLevel());
-            }
+            // foreach (Flea flea in newShepherd.GetDog().GetFleas())
+            // {
+            //     Console.WriteLine("      flea");
+            //     Console.WriteLine("         id: {0}", flea.GetId());
+            //     Console.WriteLine("         nick: {0}", flea.GetNick());
+            //     Console.WriteLine("         jump level: {0}", flea.GetJumpLevel());
+            // }
 
-            Console.WriteLine("   New sheep");
+            // Console.WriteLine("   New sheep");
 
-            foreach(Sheep sheep in newShepherd.GetSheep())
-            {
-                Console.WriteLine("   sheep");
-                Console.WriteLine("      id: {0}", sheep.GetId());
-                Console.WriteLine("      name: {0}", sheep.GetName());
-                Console.WriteLine("      wool quality: {0}", sheep.GetWoolQuality());
+            // foreach(Sheep sheep in newShepherd.GetSheep())
+            // {
+            //     Console.WriteLine("   sheep");
+            //     Console.WriteLine("      id: {0}", sheep.GetId());
+            //     Console.WriteLine("      name: {0}", sheep.GetName());
+            //     Console.WriteLine("      wool quality: {0}", sheep.GetWoolQuality());
 
-                if (sheep.GetLabel() != null)
-                {
-                    Console.WriteLine("      New label");
+            //     if (sheep.GetLabel() != null)
+            //     {
+            //         Console.WriteLine("      New label");
 
-                    Console.WriteLine("         id: {0}", sheep.GetLabel().GetId());
-                    Console.WriteLine("         nr: {0}", sheep.GetLabel().GetNr());
-                }
-            }
+            //         Console.WriteLine("         id: {0}", sheep.GetLabel().GetId());
+            //         Console.WriteLine("         nr: {0}", sheep.GetLabel().GetNr());
+            //     }
+            // }
 
-            Console.WriteLine("   New alps");
+            // Console.WriteLine("   New alps");
 
-            foreach (Alp alp in newShepherd.GetAlps())
-            {
-                Console.WriteLine("   alp");
-                Console.WriteLine("      id: {0}", alp.GetId());
-                Console.WriteLine("      name: {0}", alp.GetName());
-                Console.WriteLine("      area: {0}", alp.GetArea());
-            }
+            // foreach (Alp alp in newShepherd.GetAlps())
+            // {
+            //     Console.WriteLine("   alp");
+            //     Console.WriteLine("      id: {0}", alp.GetId());
+            //     Console.WriteLine("      name: {0}", alp.GetName());
+            //     Console.WriteLine("      area: {0}", alp.GetArea());
+            // }
 
-            Console.WriteLine();
+            // Console.WriteLine();
             Console.WriteLine("Utter success");
         }
     }
 
-    [Table("pasterz")]
+    [Table("shepherds")]
     class Shepherd
     {
         [PKey()]
-        [Column("identyfikator")]
+        [Column("id")]
         int id { get; set; }
 
-        [Column("imie")]
+        [Column("name")]
         string name { get; set; }
 
         [OneToOne]
@@ -222,17 +222,17 @@ namespace RelationshipsTest
         }
     }
 
-    [Table("pies")]
+    [Table("dogs")]
     class Dog
     {
         [PKey()]
-        [Column("identyfikator")]
+        [Column("id")]
         int id { get; set; }
 
-        [Column("imie")]
+        [Column("name")]
         string name { get; set; }
 
-        [Column("wiek")]
+        [Column("age")]
         double age { get; set; }
 
         [OneToOne]
@@ -283,17 +283,17 @@ namespace RelationshipsTest
         }
     }
 
-    [Table("pchla")]
+    [Table("fleas")]
     class Flea
     {
         [PKey()]
         [Column()]
         int id { get; set; }
 
-        [Column("pseudonim")]
+        [Column("nickname")]
         string nick { get; set; }
 
-        [Column("skocznosc")]
+        [Column("jump_level")]
         double jumpLevel { get; set; }
 
         public Flea(int id, string nick, double jumpLevel)
@@ -320,17 +320,17 @@ namespace RelationshipsTest
     }
 
 
-    [Table("miska")]
+    [Table("bowls")]
     class Bowl
     {
         [PKey()]
-        [Column("identyfikator")]
+        [Column("id")]
         int id { get; set; }
 
-        [Column("marka")]
+        [Column("mark")]
         string mark { get; set; }
 
-        [Column("wielkosc")]
+        [Column("size")]
         int size { get; set; }
 
         public Bowl(int id, string mark, int size)
@@ -357,17 +357,17 @@ namespace RelationshipsTest
     }
 
 
-    [Table("owca")]
+    [Table("sheep")]
     class Sheep
     {
         [PKey()]
         [Column()]
         int id { get; set; }
 
-        [Column("imie")]
+        [Column("name")]
         string name { get; set; }
 
-        [Column("jakosc_welny")]
+        [Column("wool_quality")]
         double woolQuality { get; set; }
 
         [OneToOne]
@@ -406,15 +406,15 @@ namespace RelationshipsTest
         }
     }
 
-    [Table("znacznik")]
+    [Table("labels")]
     class Label
     {
 
         [PKey()]
-        [Column("identyfikator")]
+        [Column("id")]
         int id { get; set; }
 
-        [Column("nr_owcy")]
+        [Column("num")]
         int nr { get; set; }
 
         public Label(int id, int nr)
@@ -433,17 +433,17 @@ namespace RelationshipsTest
         }
     }
 
-    [Table("hala_gorska")]
+    [Table("alps")]
     class Alp
     {
         [PKey()]
-        [Column("identyfikator")]
+        [Column("id")]
         int id { get; set; }
 
-        [Column("nazwa")]
+        [Column("name")]
         string name { get; set; }
 
-        [Column("powierzchnia")]
+        [Column("area")]
         double area { get; set; }
 
         public Alp(int id, string name, double area)
