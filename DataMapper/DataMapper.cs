@@ -11,7 +11,7 @@ namespace Design_Patterns_project
     {
         public static PropertyInfo[] GetTypeProperties(Type type)
         {
-            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
             PropertyInfo[] typeProperties = type.GetProperties(bindingFlags);
 
             return typeProperties;
@@ -49,8 +49,6 @@ namespace Design_Patterns_project
                 return tableAttribute._tableName;
             }
         }
-
-       
 
         public List<Tuple<string, Object>> GetColumnsAndValues(Object instance, bool isInherited = false)
         {
@@ -136,74 +134,6 @@ namespace Design_Patterns_project
             }
 
             return list;
-        }
-
-        public Object FindPrimaryKey(Object instance, bool isInherited = false)
-        {
-            Object primaryKey;
-            Type instanceType = instance.GetType();
-            PropertyInfo[] properties;
-
-            if (isInherited)
-            {
-                properties = GetTypeAllProperties(instanceType);
-            }
-            else
-            {
-                properties = GetTypeProperties(instanceType);
-            }
-
-            foreach (PropertyInfo property in properties)
-            {
-                Object[] att = property.GetCustomAttributes(typeof(PKeyAttribute), false);
-
-                if (att.Length != 0)
-                {
-                    MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
-                    primaryKey = strGetter.Invoke(instance, null);
-                    return primaryKey;
-                }
-            }
-
-            return null;
-        }
-
-        public string FindPrimaryKeyFieldName(Type instanceType, bool isInherited = false)
-        {
-            PropertyInfo[] properties;
-
-            if (isInherited)
-            {
-                properties = GetTypeAllProperties(instanceType);
-            }
-            else
-            {
-                properties = GetTypeProperties(instanceType);
-            }
-
-            foreach (PropertyInfo property in properties)
-            {
-                Object pKeyAttribute = (PKeyAttribute)property.GetCustomAttribute(typeof(PKeyAttribute), false);
-
-                if (pKeyAttribute != null)
-                {
-                    string columnName;
-                    ColumnAttribute columnAttribute = (ColumnAttribute)property.GetCustomAttribute(typeof(ColumnAttribute), false);
-
-                    if (columnAttribute._columnName == null)
-                    {
-                        columnName = property.Name;
-                    }
-                    else
-                    {
-                        columnName = columnAttribute._columnName;
-                    }
-
-                    return columnName;
-                }
-            }
-
-            return null;
         }
 
         public Dictionary<string, Object> CreateDictionaryFromRecord(IDataRecord record)

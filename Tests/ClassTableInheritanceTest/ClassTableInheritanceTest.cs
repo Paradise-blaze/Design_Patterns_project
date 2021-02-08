@@ -55,7 +55,7 @@ namespace ClassTableInheritanceTest
             //delete
             wizardManager.Delete(archMage2);
             List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 2) };
-            wizardManager.Delete("darkMage", conditions);
+            //wizardManager.Delete("darkMage", conditions);
 
             //select
             select = wizardManager.SelectAsString(typeof(ArchMage), selectConditions);
@@ -64,7 +64,7 @@ namespace ClassTableInheritanceTest
             //update
             List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, object>> { new Tuple<string, Object>("years_of_experience", 99) };
             List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.Equals("id", 3) };
-            wizardManager.Update(typeof(ArchMage), valuesToSet, updateConditions);
+            //wizardManager.Update(typeof(ArchMage), valuesToSet, updateConditions);
 
             //select
             select = wizardManager.SelectAsString(typeof(ArchMage), selectConditions);
@@ -77,7 +77,6 @@ namespace ClassTableInheritanceTest
     [Table()]
     class Character
     {
-        [PKey()]
         [Column()]
         int id { get; set; }
 
@@ -94,7 +93,6 @@ namespace ClassTableInheritanceTest
     [Table()]
     class Mage : Character
     {
-        [PKey()]
         [Column()]
         int mageID { get; set; }
 
@@ -111,7 +109,6 @@ namespace ClassTableInheritanceTest
     [Table()]
     class ArchMage : Mage
     {
-        [PKey()]
         [Column("id")]
         int archMageID { get; set; }
 
@@ -129,7 +126,6 @@ namespace ClassTableInheritanceTest
     [Table()]
     class DarkMage : Mage
     {
-        [PKey()]
         [Column("id")]
         int darkMageID { get; set; }
 
