@@ -18,19 +18,19 @@ namespace ConcreteTableInheritanceTest
             DataManager vehicleManager = new DataManager("LAPTOP-BHF7G1P9", "ConcreteTableInheritanceTest");
             //DataManager vehicleManager = new DataManager("DESKTOP-HVUO0CP", "ConcreteTableInheritanceTest");
 
-            FourWheeledVehicle car1 = new FourWheeledVehicle(1, 250.21, 8.12);
-            FourWheeledVehicle car2 = new FourWheeledVehicle(2, 245.15, 7.91);
-            FourWheeledVehicle car3 = new FourWheeledVehicle(3, 234.59, 8.65);
-            TwoWheeledVehicle motorbike1 = new TwoWheeledVehicle(1, 154.15, 18.91);
-            TwoWheeledVehicle motorbike2 = new TwoWheeledVehicle(2, 166.67, 20.51);
-            TwoWheeledVehicle motorbike3 = new TwoWheeledVehicle(3, 165.51, 21.51);
-            Vehicle truck1 = new Vehicle(1, 105.51);
-            Vehicle truck2 = new Vehicle(2, 99.81);
-            Vehicle truck3 = new Vehicle(3, 101.74);
-            Vehicle truck4 = new Vehicle(4, 106.12);
-            Vehicle truck5 = new Vehicle(5, 113.95);
-            Vehicle bike1 = new Vehicle(6, 51.66);
-            Vehicle bike2 = new Vehicle(7, 48.91);
+            FourWheeledVehicle car1 = new FourWheeledVehicle(250.21, 8.12);
+            FourWheeledVehicle car2 = new FourWheeledVehicle(245.15, 7.91);
+            FourWheeledVehicle car3 = new FourWheeledVehicle(234.59, 8.65);
+            TwoWheeledVehicle motorbike1 = new TwoWheeledVehicle(154.15, 18.91);
+            TwoWheeledVehicle motorbike2 = new TwoWheeledVehicle(166.67, 20.51);
+            TwoWheeledVehicle motorbike3 = new TwoWheeledVehicle(165.51, 21.51);
+            Vehicle truck1 = new Vehicle(105.51);
+            Vehicle truck2 = new Vehicle(99.81);
+            Vehicle truck3 = new Vehicle(101.74);
+            Vehicle truck4 = new Vehicle(106.12);
+            Vehicle truck5 = new Vehicle(113.95);
+            Vehicle bike1 = new Vehicle(51.66);
+            Vehicle bike2 = new Vehicle(48.91);
             List<Object> vehicles = new List<Object>() { car1, motorbike1 };
 
             //create and inherit
@@ -51,37 +51,21 @@ namespace ConcreteTableInheritanceTest
             vehicleManager.Insert(bike1);
             vehicleManager.Insert(bike2);
 
-            //select
-            List<SqlCondition> selectConditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 11) };
-            string select = vehicleManager.SelectAsString(typeof(TwoWheeledVehicle), selectConditions);
-            Console.WriteLine('\n' + select + '\n');
+            //update
+            truck3.velocity = 109.25;
+            car1.size = 8.92;
+            vehicleManager.Update(truck3);
+            vehicleManager.Update(car1);
 
             //delete
-            List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.GreaterThan("size", 8) };
-            //vehicleManager.Delete("FourWheeledVehicle", conditions);
-            vehicleManager.Delete(motorbike2);
-
-            //select
-            select = vehicleManager.SelectAsString(typeof(TwoWheeledVehicle), selectConditions);
-            Console.WriteLine('\n' + select + '\n');
-
-            //update
-            List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, object>> { new Tuple<string, Object>("acceleration", 20.54) };
-            List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.LowerThan("velocity", 159.99) };
-            //vehicleManager.Update(typeof(TwoWheeledVehicle), valuesToSet, updateConditions);
-
-            //select
-            select = vehicleManager.SelectAsString(typeof(TwoWheeledVehicle), selectConditions);
-            Console.WriteLine('\n' + select + '\n');
+            vehicleManager.Delete(truck5);
 
             //Test for relation-object mapping
-            /*List<SqlCondition> selectVehicleConditions = new List<SqlCondition> { SqlCondition.Equals("id", 2) };
-            List<Object> objects = vehicleManager.Select(typeof(FourWheeledVehicle), selectVehicleConditions);
-            FourWheeledVehicle newVehicle = (FourWheeledVehicle)objects[0];
+            FourWheeledVehicle newVehicle = (FourWheeledVehicle)vehicleManager.Select(typeof(FourWheeledVehicle), 1);
 
-            Console.WriteLine(newVehicle.GetId());
-            Console.WriteLine(newVehicle.GetVelocity());
-            Console.WriteLine(newVehicle.GetSize());*/
+            Console.WriteLine("\nNew vehicle");
+            Console.WriteLine("    velocity: {0}", newVehicle.velocity);
+            Console.WriteLine("    size: {0}", newVehicle.size);
 
             Console.WriteLine("Utter success");
         }
@@ -91,25 +75,11 @@ namespace ConcreteTableInheritanceTest
     class Vehicle
     {
         [Column()]
-        int id { get; set; }
+        public double velocity { get; set; }
 
-        [Column()]
-        double velocity { get; set; }
-
-        public Vehicle(int id, double velocity)
+        public Vehicle(double velocity)
         {
-            this.id = id;
             this.velocity = velocity;
-        }
-
-        public int GetId()
-        {
-            return this.id;
-        }
-
-        public double GetVelocity()
-        {
-            return this.velocity;
         }
     }
 
@@ -117,16 +87,11 @@ namespace ConcreteTableInheritanceTest
     class FourWheeledVehicle : Vehicle
     {
         [Column()]
-        double size { get; set; }
+        public double size { get; set; }
 
-        public FourWheeledVehicle(int id, double velocity, double size) : base(id, velocity)
+        public FourWheeledVehicle(double velocity, double size) : base(velocity)
         {
             this.size = size;
-        }
-
-        public double GetSize()
-        {
-            return this.size;
         }
     }
 
@@ -134,9 +99,9 @@ namespace ConcreteTableInheritanceTest
     class TwoWheeledVehicle : Vehicle
     {
         [Column()]
-        double acceleration { get; set; }
+        public double acceleration { get; set; }
 
-        public TwoWheeledVehicle(int id, double velocity, double acceleration) : base(id, velocity)
+        public TwoWheeledVehicle(double velocity, double acceleration) : base(velocity)
         {
             this.acceleration = acceleration;
         }

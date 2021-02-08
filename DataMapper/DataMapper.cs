@@ -11,7 +11,7 @@ namespace Design_Patterns_project
     {
         public static PropertyInfo[] GetTypeProperties(Type type)
         {
-            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
             PropertyInfo[] typeProperties = type.GetProperties(bindingFlags);
 
             return typeProperties;

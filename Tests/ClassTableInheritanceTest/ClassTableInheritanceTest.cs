@@ -18,17 +18,17 @@ namespace ClassTableInheritanceTest
             DataManager wizardManager = new DataManager("LAPTOP-BHF7G1P9", "ClassTableInheritanceTest");
             //DataManager wizardManager = new DataManager("DESKTOP-HVUO0CP", "ClassTableInheritanceTest");
 
-            ArchMage archMage1 = new ArchMage(1, "Gandalf", 1, 2.32, 1, 106);
-            ArchMage archMage2 = new ArchMage(1, "Vilgefortz", 1, 2.29, 2, 104);
-            ArchMage archMage3 = new ArchMage(1, "Blacki", 1, 2.61, 3, 111);
-            ArchMage archMage4 = new ArchMage(1, "Detmold", 1, 2.05, 4, 91);
-            DarkMage darkMage1 = new DarkMage(1, "Saruman", 1, 2.26, 1, 89);
-            DarkMage darkMage2 = new DarkMage(1, "Dark Wizard", 1, 1.73, 2, 70);
-            Mage mage1 = new Mage(1, "Radagast", 1, 67);
-            Mage mage2 = new Mage(1, "Merlin", 2, 86);
-            Character character1 = new Character(1, "Bilbo Baggins");
-            Character character2 = new Character(2, "Dijkstra");
-            Character character3 = new Character(3, "King Arthur");
+            ArchMage archMage1 = new ArchMage("Gandalf", 2.32, 106);
+            ArchMage archMage2 = new ArchMage("Vilgefortz", 2.29, 104);
+            ArchMage archMage3 = new ArchMage("Blacki", 2.61, 111);
+            ArchMage archMage4 = new ArchMage("Detmold", 2.05, 91);
+            DarkMage darkMage1 = new DarkMage("Saruman", 2.26, 89);
+            DarkMage darkMage2 = new DarkMage("Dark Wizard", 1.73, 70);
+            Mage mage1 = new Mage("Radagast", 67);
+            Mage mage2 = new Mage("Merlin", 86);
+            Character character1 = new Character("Bilbo Baggins");
+            Character character2 = new Character("Dijkstra");
+            Character character3 = new Character("King Arthur");
             List<Object> mages = new List<Object>() { archMage1, darkMage1 };
 
             //create and inherit
@@ -47,28 +47,14 @@ namespace ClassTableInheritanceTest
             wizardManager.Insert(character2);
             wizardManager.Insert(character3);
 
-            //select
-            List<SqlCondition> selectConditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 6) };
-            string select = wizardManager.SelectAsString(typeof(ArchMage), selectConditions);
-            Console.WriteLine('\n' + select + '\n');
+            //update
+            character2.name = "Sigi Reuven";
+            archMage1.yearsOfExperience = 110;
+            wizardManager.Update(character2);
+            wizardManager.Update(archMage1);
 
             //delete
             wizardManager.Delete(archMage2);
-            List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.LowerThan("id", 2) };
-            //wizardManager.Delete("darkMage", conditions);
-
-            //select
-            select = wizardManager.SelectAsString(typeof(ArchMage), selectConditions);
-            Console.WriteLine('\n' + select + '\n');
-
-            //update
-            List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, object>> { new Tuple<string, Object>("years_of_experience", 99) };
-            List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.Equals("id", 3) };
-            //wizardManager.Update(typeof(ArchMage), valuesToSet, updateConditions);
-
-            //select
-            select = wizardManager.SelectAsString(typeof(ArchMage), selectConditions);
-            Console.WriteLine('\n'+select+'\n');
 
             Console.WriteLine("Utter success");
         }
@@ -78,14 +64,10 @@ namespace ClassTableInheritanceTest
     class Character
     {
         [Column()]
-        int id { get; set; }
+        public string name { get; set; }
 
-        [Column()]
-        string name { get; set; }
-
-        public Character(int id, string name)
+        public Character(string name)
         {
-            this.id = id;
             this.name = name;
         }
     }
@@ -93,15 +75,11 @@ namespace ClassTableInheritanceTest
     [Table()]
     class Mage : Character
     {
-        [Column()]
-        int mageID { get; set; }
-
         [Column("spell_skills")]
-        double spellSkills { get; set; }
+        public double spellSkills { get; set; }
 
-        public Mage(int id, string name, int mageID, double spellSkills) : base(id, name)
+        public Mage(string name, double spellSkills) : base(name)
         {
-            this.mageID = mageID;
             this.spellSkills = spellSkills;
         }
     }
@@ -109,16 +87,12 @@ namespace ClassTableInheritanceTest
     [Table()]
     class ArchMage : Mage
     {
-        [Column("id")]
-        int archMageID { get; set; }
-
         [Column("years_of_experience")]
-        int yearsOfExperience { get; set; }
+        public int yearsOfExperience { get; set; }
 
-        public ArchMage(int id, string name, int mageID, double spellSkills, int archMageID, int yearsOfExperience)
-            : base(id, name, mageID, spellSkills)
+        public ArchMage(string name, double spellSkills, int yearsOfExperience)
+            : base(name, spellSkills)
         {
-            this.archMageID = archMageID;
             this.yearsOfExperience = yearsOfExperience;
         }
     }
@@ -126,16 +100,12 @@ namespace ClassTableInheritanceTest
     [Table()]
     class DarkMage : Mage
     {
-        [Column("id")]
-        int darkMageID { get; set; }
-
         [Column()]
-        double necromancy { get; set; }
+        public double necromancy { get; set; }
 
-        public DarkMage(int id, string name, int mageID, double spellSkills, int darkMageID, double necromancy) 
-            : base(id, name, mageID, spellSkills)
+        public DarkMage(string name, double spellSkills, double necromancy) 
+            : base(name, spellSkills)
         {
-            this.darkMageID = darkMageID;
             this.necromancy = necromancy;
         }
     }

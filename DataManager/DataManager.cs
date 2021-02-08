@@ -33,15 +33,26 @@ namespace Design_Patterns_project
             this._msSqlConnection = new MsSqlConnection(config);
         }
 
-        private int FindMinimumAvailableID(Object instance)
+        private int FindMinimumAvailableID(Type type, bool single = false)
         {
-            if (!_dataDictionary.ContainsKey(instance.GetType()))
+            Type instanceType;
+
+            if (single)
+            {
+                instanceType = _tableInheritance.GetMainType(type);
+            }
+            else
+            {
+                instanceType = type;
+            }
+
+            if (!_dataDictionary.ContainsKey(instanceType))
             {
                 return 1;
             }
             else
             {
-                List<int> keyList = new List<int>(_dataDictionary[instance.GetType()].Keys);
+                List<int> keyList = new List<int>(_dataDictionary[instanceType].Keys);
                 keyList.Sort();
                 int availableMinimum = keyList.Max() + 1;
 
@@ -57,31 +68,61 @@ namespace Design_Patterns_project
             }
         }
 
-        private void AddPrimaryKey(Object instance)
+        private void AddPrimaryKey(Object instance, bool single = false)
         {
-            int availableMinimum = FindMinimumAvailableID(instance);
+            Type type;
 
-            if (!_dataDictionary.ContainsKey(instance.GetType()))
+            if (single)
             {
-                _dataDictionary.Add(instance.GetType(), new Dictionary<int, object> { {availableMinimum, instance } });
+                type = _tableInheritance.GetMainType(instance.GetType());
             }
             else
             {
-                _dataDictionary[instance.GetType()].Add(availableMinimum, instance);
+                type = instance.GetType();
+            }
+
+            int availableMinimum = FindMinimumAvailableID(type);
+
+            if (!_dataDictionary.ContainsKey(type))
+            {
+                _dataDictionary.Add(type, new Dictionary<int, object> { { availableMinimum, instance } });
+            }
+            else
+            {
+                _dataDictionary[type].Add(availableMinimum, instance);
             }
         }
 
-        private int FindPrimaryKey(Object instance)
+        private int FindPrimaryKey(Object instance, bool single = false)
         {
-            return _dataDictionary[instance.GetType()].FirstOrDefault(x => x.Value == instance).Key;
+            if (single)
+            {
+                Type rootHierarchyType = _tableInheritance.GetMainType(instance.GetType());
+                return _dataDictionary[rootHierarchyType].FirstOrDefault(x => x.Value == instance).Key;
+            }
+            else
+            {
+                return _dataDictionary[instance.GetType()].FirstOrDefault(x => x.Value == instance).Key;
+            }
         }
 
-        private void DeletePrimaryKey(Object instance)
+        private void DeletePrimaryKey(Object instance, bool single = false)
         {
-            if (_dataDictionary.ContainsKey(instance.GetType()))
+            Type type;
+
+            if (single)
+            {
+                type = _tableInheritance.GetMainType(instance.GetType());
+            }
+            else
+            {
+                type = instance.GetType();
+            }
+
+            if (_dataDictionary.ContainsKey(type))
             {
                 int key = FindPrimaryKey(instance);
-                _dataDictionary[instance.GetType()].Remove(key);
+                _dataDictionary[type].Remove(key);
             }
         }
 
@@ -96,7 +137,7 @@ namespace Design_Patterns_project
             string mainTableName = _dataMapper.GetTableName(mainInstance.GetType());
             string childTableName = _dataMapper.GetTableName(childInstance.GetType());
             string columnName = childTableName + "_id";
-            int childPrimaryKey = FindMinimumAvailableID(childInstance);
+            int childPrimaryKey = FindMinimumAvailableID(childInstance.GetType());
             string addColumnQuery =  _queryBuilder.CreateAddColumnQuery(mainTableName,columnName,childPrimaryKey.GetType());
             string foreignKeyQuery = _queryBuilder.CreateAddForeignKeyQuery(mainTableName, columnName, "id", childTableName);
 
@@ -112,7 +153,7 @@ namespace Design_Patterns_project
         private void CreateTable(Object instance, string parentTableName, string foreignKeyName)
         {
             List<Tuple<string, Object>> columnsAndValuesList = _dataMapper.GetColumnsAndValues(instance);
-            int primaryKey = FindMinimumAvailableID(instance);
+            int primaryKey = FindMinimumAvailableID(instance.GetType());
             columnsAndValuesList.Add(new Tuple<string, Object>("id", primaryKey));
             string tableName = _dataMapper.GetTableName(instance.GetType());
             string query;
@@ -123,7 +164,7 @@ namespace Design_Patterns_project
             }
             else
             {
-                int foreignKey = FindMinimumAvailableID(instance);
+                int foreignKey = FindMinimumAvailableID(instance.GetType());
                 Dictionary<string, Tuple<string, Object>> tableAndForeignKey = new Dictionary<string, Tuple<string, Object>>
                 { {parentTableName, new Tuple<string, Object> (foreignKeyName, foreignKey)} };
                 query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, "id", tableAndForeignKey);
@@ -147,7 +188,6 @@ namespace Design_Patterns_project
                     Object value = strGetter.Invoke(instance, null);
                     CreateTable(value);
                     AddForeignKey(instance,value);
-
                 }
             }
 
@@ -176,8 +216,8 @@ namespace Design_Patterns_project
 
                     string memberTableName = _dataMapper.GetTableName(secondInstance.GetType());
                     string mergedTablesName = GetMergedNames(tableName, memberTableName);
-                    int firstPrimaryKey = FindMinimumAvailableID(instance);
-                    int secondPrimaryKey = FindMinimumAvailableID(secondInstance);
+                    int firstPrimaryKey = FindMinimumAvailableID(instance.GetType());
+                    int secondPrimaryKey = FindMinimumAvailableID(secondInstance.GetType());
 
                     Dictionary<string, Tuple<string, Object>> tablesAndForeignKeys = new Dictionary<string, Tuple<string, Object>> {
                         { tableName, new Tuple<string, Object>("id", firstPrimaryKey) },
@@ -199,8 +239,8 @@ namespace Design_Patterns_project
         private void CreateTable(Type objectType, List<PropertyInfo> inheritedProperties)
         {
             List<Tuple<string, Object>> columnsBasedOnProperties = _dataMapper.GetInheritedColumnsAndValues(inheritedProperties);
+            columnsBasedOnProperties.Add(new Tuple<string, object>("id", 0));
             string tableName = _dataMapper.GetTableName(objectType);
-            // to fix
             string query = _queryBuilder.CreateCreateTableQuery(tableName, columnsBasedOnProperties, "id");
 
             PerformQuery(query);
@@ -263,7 +303,6 @@ namespace Design_Patterns_project
             {
                 PropertyInfo property = relationship._secondMember;
                 Type childType = property.PropertyType;
-                string childTableName = _dataMapper.GetTableName(childType);
                 int foreignKey = GetForeignKeyFromTable(tableName, primaryKey);                    
 
                 List<SqlCondition> condition = new List<SqlCondition> { SqlCondition.Equals("id", foreignKey) };
@@ -428,8 +467,8 @@ namespace Design_Patterns_project
 
         public void Insert(Object obj, Tuple<string, object> parentKey = null)
         {
-            if (obj != null){
-
+            if (obj != null)
+            {
                 string tableName = _dataMapper.GetTableName(obj.GetType());
                 List<Tuple<string, object>> columnsAndValuesList;
                 int primaryKey;
@@ -437,18 +476,21 @@ namespace Design_Patterns_project
                 if (_msSqlConnection.CheckIfTableExists(tableName))
                 {
                     // concrete table inheritance
-                    if ((_msSqlConnection.GetColumnNamesFromTable(tableName)).Count == (DataMapper.GetTypeAllProperties(obj.GetType())).Length)
+
+                    if ((_msSqlConnection.GetColumnNamesFromTable(tableName)).Count - 1 == (DataMapper.GetTypeAllProperties(obj.GetType())).Length)
                     {
                         columnsAndValuesList = _dataMapper.GetColumnsAndValues(obj, true);
-                        primaryKey = FindMinimumAvailableID(obj);
+                        primaryKey = FindMinimumAvailableID(obj.GetType());
                         columnsAndValuesList.Add(new Tuple<string, Object>("id", primaryKey));
+                        AddPrimaryKey(obj);
                     }
                     // class table inheritance or normal insert on single class
                     else
                     {
                         columnsAndValuesList = _dataMapper.GetColumnsAndValues(obj);
-                        primaryKey = FindMinimumAvailableID(obj);
+                        primaryKey = FindMinimumAvailableID(obj.GetType());
                         columnsAndValuesList.Add(new Tuple<string, Object>("id", primaryKey));
+                        AddPrimaryKey(obj);
                     }
                 }
                 // single table inheritance
@@ -457,8 +499,9 @@ namespace Design_Patterns_project
                     Type rootHierarchyType = _tableInheritance.GetMainType(obj.GetType());
                     tableName = _dataMapper.GetTableName(rootHierarchyType);
                     columnsAndValuesList = _dataMapper.GetColumnsAndValues(obj, true);
-                    primaryKey = FindMinimumAvailableID(obj);
+                    primaryKey = FindMinimumAvailableID(obj.GetType(), true);
                     columnsAndValuesList.Add(new Tuple<string, Object>("id", primaryKey));
+                    AddPrimaryKey(obj, true);
                 }
 
                 // relationships lists
@@ -479,7 +522,6 @@ namespace Design_Patterns_project
                 }
 
                 PerformQuery(insertQuery);
-                AddPrimaryKey(obj);
 
                 if (oneToOne.Count != 0)
                 {
@@ -488,7 +530,7 @@ namespace Design_Patterns_project
                         PropertyInfo propertyObj = relation._secondMember;
                         MethodInfo getter = propertyObj.GetGetMethod(nonPublic: true);
                         Object child = getter.Invoke(obj, null);
-                        int childPrimaryKey = FindMinimumAvailableID(child);
+                        int childPrimaryKey = FindMinimumAvailableID(child.GetType());
                         string childTableName = _dataMapper.GetTableName(child.GetType());
 
                         List<Tuple<string, object>> valuesToSet = new List<Tuple<string, object>> 
@@ -529,7 +571,7 @@ namespace Design_Patterns_project
 
                         foreach (var item in childList)
                         {
-                            int secondMemberKey = FindMinimumAvailableID(item);
+                            int secondMemberKey = FindMinimumAvailableID(item.GetType());
                             string childTableName = _dataMapper.GetTableName(item.GetType());
 
                             Insert(item);
@@ -569,11 +611,13 @@ namespace Design_Patterns_project
                 if ((_msSqlConnection.GetColumnNamesFromTable(tableName)).Count == (DataMapper.GetTypeAllProperties(obj.GetType())).Length)
                 {
                     primaryKey = FindPrimaryKey(obj);
+                    DeletePrimaryKey(obj);
                 }
                 // class table inheritance or normal insert on single class
                 else
                 {
                     primaryKey = FindPrimaryKey(obj);
+                    DeletePrimaryKey(obj);
                 }
             }
             // single table inheritance
@@ -581,21 +625,33 @@ namespace Design_Patterns_project
             {
                 Type rootHierarchyType = _tableInheritance.GetMainType(obj.GetType());
                 tableName = _dataMapper.GetTableName(rootHierarchyType);
-                primaryKey = FindPrimaryKey(obj);
+                primaryKey = FindPrimaryKey(obj, true);
+                DeletePrimaryKey(obj, true);
             }
 
             List<SqlCondition> listOfCriteria = new List<SqlCondition> { SqlCondition.Equals("id", primaryKey) };
             string query = _queryBuilder.CreateDeleteQuery(tableName, listOfCriteria);
 
             PerformQuery(query);
-            DeletePrimaryKey(obj);
         }
 
         public void Update(Object instance)
         {
-            int primaryKey = FindPrimaryKey(instance);
+            int primaryKey;
+            List<Tuple<string, Object>> valuesToSet;
+            string tableName = _dataMapper.GetTableName(instance.GetType());
 
-            List<Tuple<string, Object>> valuesToSet = _dataMapper.GetColumnsAndValues(instance);
+            if (!_msSqlConnection.CheckIfTableExists(tableName))
+            {
+                primaryKey = FindPrimaryKey(instance, true);
+                valuesToSet = _dataMapper.GetColumnsAndValues(instance, true);
+            }
+            else
+            {
+                primaryKey = FindPrimaryKey(instance);
+                valuesToSet = _dataMapper.GetColumnsAndValues(instance);
+            }
+
             List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.Equals("id", primaryKey) };
 
             Update(instance.GetType(), valuesToSet, updateConditions);
