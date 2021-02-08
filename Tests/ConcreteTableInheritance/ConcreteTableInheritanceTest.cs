@@ -58,7 +58,7 @@ namespace ConcreteTableInheritanceTest
 
             //delete
             List<SqlCondition> conditions = new List<SqlCondition> { SqlCondition.GreaterThan("size", 8) };
-            vehicleManager.Delete("FourWheeledVehicle", conditions);
+            //vehicleManager.Delete("FourWheeledVehicle", conditions);
             vehicleManager.Delete(motorbike2);
 
             //select
@@ -68,20 +68,20 @@ namespace ConcreteTableInheritanceTest
             //update
             List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, object>> { new Tuple<string, Object>("acceleration", 20.54) };
             List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.LowerThan("velocity", 159.99) };
-            vehicleManager.Update(typeof(TwoWheeledVehicle), valuesToSet, updateConditions);
+            //vehicleManager.Update(typeof(TwoWheeledVehicle), valuesToSet, updateConditions);
 
             //select
             select = vehicleManager.SelectAsString(typeof(TwoWheeledVehicle), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
             //Test for relation-object mapping
-            List<SqlCondition> selectVehicleConditions = new List<SqlCondition> { SqlCondition.Equals("id", 2) };
+            /*List<SqlCondition> selectVehicleConditions = new List<SqlCondition> { SqlCondition.Equals("id", 2) };
             List<Object> objects = vehicleManager.Select(typeof(FourWheeledVehicle), selectVehicleConditions);
             FourWheeledVehicle newVehicle = (FourWheeledVehicle)objects[0];
 
             Console.WriteLine(newVehicle.GetId());
             Console.WriteLine(newVehicle.GetVelocity());
-            Console.WriteLine(newVehicle.GetSize());
+            Console.WriteLine(newVehicle.GetSize());*/
 
             Console.WriteLine("Utter success");
         }
@@ -90,7 +90,6 @@ namespace ConcreteTableInheritanceTest
     [Table()]
     class Vehicle
     {
-        [PKey()]
         [Column()]
         int id { get; set; }
 

@@ -52,7 +52,7 @@ namespace SingleTableInheritanceTest
 
             //delete
             List<SqlCondition> deleteConditions = new List<SqlCondition> { SqlCondition.LowerThan("blast_power", 11) };
-            mythicalManager.Delete("MythicalCreature", deleteConditions);
+            //mythicalManager.Delete("MythicalCreature", deleteConditions);
             mythicalManager.Delete(dragon1);
 
             //select
@@ -62,14 +62,14 @@ namespace SingleTableInheritanceTest
             //update
             List<Tuple<string, Object>> valuesToSet = new List<Tuple<string, Object>> { new Tuple<string, Object>("endurance", 10) };
             List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.LowerThan("health", 100) };
-            mythicalManager.Update(typeof(MythicalCreature), valuesToSet, updateConditions);
+            //mythicalManager.Update(typeof(MythicalCreature), valuesToSet, updateConditions);
 
             //select
             select = mythicalManager.SelectAsString(typeof(MythicalCreature), selectConditions);
             Console.WriteLine('\n' + select + '\n');
 
             //Test for relation-object mapping
-            List<SqlCondition> selectMythicalConditions = new List<SqlCondition> { SqlCondition.Equals("id", 10) };
+            /*List<SqlCondition> selectMythicalConditions = new List<SqlCondition> { SqlCondition.Equals("id", 10) };
             List<Object> objects = mythicalManager.Select(typeof(GoldDragon), selectMythicalConditions);
             GoldDragon newShepherd = (GoldDragon)objects[0];
 
@@ -79,7 +79,7 @@ namespace SingleTableInheritanceTest
             Console.WriteLine(newShepherd.GetBlastPower());
             Console.WriteLine(newShepherd.GetEndurance());
             Console.WriteLine(newShepherd.GetMineralHunger());
-            Console.WriteLine(newShepherd.GetPreciousness());
+            Console.WriteLine(newShepherd.GetPreciousness());*/
 
             Console.WriteLine("Utter success");
         }
@@ -88,7 +88,6 @@ namespace SingleTableInheritanceTest
     [Table()]
     class MythicalCreature
     {
-        [PKey()]
         [Column()]
         int id { get; set; }
 
