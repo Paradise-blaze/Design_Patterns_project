@@ -73,21 +73,26 @@ namespace RelationshipsTest
             mountainManager.Delete(flea3);
 
             //Test for relation-object mapping
-            
             Shepherd newShepherd = (Shepherd)mountainManager.Select(typeof(Shepherd), 1);
 
-            Console.WriteLine("New shepherd");
-            Console.WriteLine("   name: {0}", newShepherd.name);
+            IntroduceShepherd(newShepherd);
+            Console.WriteLine("Utter success");
+        }
+
+        public static void IntroduceShepherd(Shepherd shepherd)
+        {
+            Console.WriteLine("\nNew shepherd");
+            Console.WriteLine("   name: {0}", shepherd.name);
             Console.WriteLine("   New dog");
-            Console.WriteLine("      name: {0}", newShepherd.dog.name);
-            Console.WriteLine("      age: {0}", newShepherd.dog.age);
+            Console.WriteLine("      name: {0}", shepherd.dog.name);
+            Console.WriteLine("      age: {0}", shepherd.dog.age);
             Console.WriteLine("      New bowl");
-            Console.WriteLine("         mark: {0}", newShepherd.dog.bowl.mark);
-            Console.WriteLine("         size: {0}", newShepherd.dog.bowl.size);
+            Console.WriteLine("         mark: {0}", shepherd.dog.bowl.mark);
+            Console.WriteLine("         size: {0}", shepherd.dog.bowl.size);
 
             Console.WriteLine("      New fleas");
 
-            foreach (Flea flea in newShepherd.dog.fleas)
+            foreach (Flea flea in shepherd.dog.fleas)
             {
                 Console.WriteLine("      flea");
                 Console.WriteLine("         nick: {0}", flea.nick);
@@ -96,7 +101,7 @@ namespace RelationshipsTest
 
             Console.WriteLine("   New sheep");
 
-            foreach(Sheep sheep in newShepherd.sheep)
+            foreach (Sheep sheep in shepherd.sheep)
             {
                 Console.WriteLine("   sheep");
                 Console.WriteLine("      name: {0}", sheep.name);
@@ -112,7 +117,7 @@ namespace RelationshipsTest
 
             Console.WriteLine("   New alps");
 
-            foreach (Alp alp in newShepherd.alps)
+            foreach (Alp alp in shepherd.alps)
             {
                 Console.WriteLine("   alp");
                 Console.WriteLine("      name: {0}", alp.name);
@@ -120,7 +125,6 @@ namespace RelationshipsTest
             }
 
             Console.WriteLine();
-            Console.WriteLine("Utter success");
         }
     }
 
