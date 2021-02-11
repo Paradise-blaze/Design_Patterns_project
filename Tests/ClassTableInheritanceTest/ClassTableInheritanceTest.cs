@@ -31,6 +31,13 @@ namespace ClassTableInheritanceTest
             Character character3 = new Character("King Arthur");
             List<Object> mages = new List<Object>() { archMage1, darkMage1 };
 
+            //cases of incorrect usage of methods (before creating tables)
+            wizardManager.Insert(darkMage2);
+            wizardManager.Update(character2);
+            wizardManager.Delete(archMage2);
+            wizardManager.Insert(mage1);
+            wizardManager.Inherit(mages, 420);
+
             //create and inherit
             wizardManager.Inherit(mages, 1);
 
@@ -40,8 +47,6 @@ namespace ClassTableInheritanceTest
             wizardManager.Insert(archMage3);
             wizardManager.Insert(archMage4);
             wizardManager.Insert(darkMage1);
-            wizardManager.Insert(darkMage2);
-            wizardManager.Insert(mage1);
             wizardManager.Insert(mage2);
             wizardManager.Insert(character1);
             wizardManager.Insert(character2);
@@ -49,12 +54,31 @@ namespace ClassTableInheritanceTest
 
             //update
             character2.name = "Sigi Reuven";
+            mage1.spellSkills = 2.51;
             archMage1.yearsOfExperience = 110;
             wizardManager.Update(character2);
+            wizardManager.Update(mage1);
             wizardManager.Update(archMage1);
 
             //delete
             wizardManager.Delete(archMage2);
+            wizardManager.Delete(archMage2);
+            wizardManager.Delete(mage1);
+
+            //select
+            DarkMage newDarkMage = (DarkMage)wizardManager.Select(typeof(DarkMage), 1);
+
+            if (newDarkMage == null)
+            {
+                Console.WriteLine("\nThere is no object of that id in table\n");
+            }
+            else
+            {
+                Console.WriteLine("New dark mage");
+                Console.WriteLine("   {0}", newDarkMage.name);
+                Console.WriteLine("   {0}", newDarkMage.spellSkills);
+                Console.WriteLine("   {0}", newDarkMage.necromancy);
+            }
 
             Console.WriteLine("Utter success");
         }

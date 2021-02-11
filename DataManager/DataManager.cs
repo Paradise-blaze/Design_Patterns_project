@@ -98,11 +98,35 @@ namespace Design_Patterns_project
             if (single)
             {
                 Type rootHierarchyType = _tableInheritance.GetMainType(instance.GetType());
-                return _dataDictionary[rootHierarchyType].FirstOrDefault(x => x.Value == instance).Key;
+                if (_dataDictionary.ContainsKey(rootHierarchyType))
+                {
+                    KeyValuePair<int, Object> obj = _dataDictionary[rootHierarchyType].FirstOrDefault(x => x.Value == instance);
+
+                    if (!obj.Equals(default(KeyValuePair<int, Object>)))
+                    {
+                        return obj.Key;
+                    }
+
+                    return -1;
+                }
+
+                return -1;
             }
             else
             {
-                return _dataDictionary[instance.GetType()].FirstOrDefault(x => x.Value == instance).Key;
+                if (_dataDictionary.ContainsKey(instance.GetType()))
+                {
+                    KeyValuePair<int, Object> obj = _dataDictionary[instance.GetType()].FirstOrDefault(x => x.Value == instance);
+
+                    if (!obj.Equals(default(KeyValuePair<int, Object>)))
+                    {
+                        return obj.Key;
+                    }
+
+                    return -1;
+                }
+
+                return -1;
             }
         }
 
@@ -152,79 +176,92 @@ namespace Design_Patterns_project
 
         private void CreateTable(Object instance, string parentTableName, string foreignKeyName)
         {
-            List<Tuple<string, Object>> columnsAndValuesList = _dataMapper.GetColumnsAndValues(instance);
-            int primaryKey = FindMinimumAvailableID(instance.GetType());
-            columnsAndValuesList.Add(new Tuple<string, Object>("id", primaryKey));
-            string tableName = _dataMapper.GetTableName(instance.GetType());
-            string query;
+            if (instance != null)
+            {
 
-            if (parentTableName.Equals(""))
-            {
-                query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, "id");
-            }
-            else
-            {
-                int foreignKey = FindMinimumAvailableID(instance.GetType());
-                Dictionary<string, Tuple<string, Object>> tableAndForeignKey = new Dictionary<string, Tuple<string, Object>>
+                List<Tuple<string, Object>> columnsAndValuesList = _dataMapper.GetColumnsAndValues(instance);
+                int primaryKey = FindMinimumAvailableID(instance.GetType());
+                columnsAndValuesList.Add(new Tuple<string, Object>("id", primaryKey));
+                string tableName = _dataMapper.GetTableName(instance.GetType());
+                string query;
+
+                if (parentTableName.Equals(""))
+                {
+                    query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, "id");
+                }
+                else
+                {
+                    int foreignKey = FindMinimumAvailableID(instance.GetType());
+                    Dictionary<string, Tuple<string, Object>> tableAndForeignKey = new Dictionary<string, Tuple<string, Object>>
                 { {parentTableName, new Tuple<string, Object> (foreignKeyName, foreignKey)} };
-                query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, "id", tableAndForeignKey);
-            }
-
-            PerformQuery(query);
-
-            // foreign key mapping
-            List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(instance.GetType());
-            List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(instance.GetType());
-
-            // association table mapping
-            List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(instance.GetType());
-
-            if (oneToOne.Count != 0)
-            {
-                foreach (var relation in oneToOne)
-                {
-                    PropertyInfo property = relation._secondMember;
-                    MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
-                    Object value = strGetter.Invoke(instance, null);
-                    CreateTable(value);
-                    AddForeignKey(instance,value);
+                    query = _queryBuilder.CreateCreateTableQuery(tableName, columnsAndValuesList, "id", tableAndForeignKey);
                 }
-            }
 
-            if (oneToMany.Count != 0)
-            {
-                foreach (var relation in oneToMany)
+                PerformQuery(query);
+
+                // foreign key mapping
+                List<Relationship> oneToOne = _relationshipFinder.FindOneToOne(instance.GetType());
+                List<Relationship> oneToMany = _relationshipFinder.FindOneToMany(instance.GetType());
+
+                // association table mapping
+                List<Relationship> manyToMany = _relationshipFinder.FindManyToMany(instance.GetType());
+
+                if (oneToOne.Count != 0)
                 {
-                    PropertyInfo property = relation._secondMember;
-                    MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
-                    var values = strGetter.Invoke(instance, null);
-                    IList valueList = values as IList;
-
-                    CreateTable(valueList[0], tableName, "id");
+                    foreach (var relation in oneToOne)
+                    {
+                        PropertyInfo property = relation._secondMember;
+                        MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
+                        Object value = strGetter.Invoke(instance, null);
+                        if (value != null)
+                        {
+                            CreateTable(value);
+                            AddForeignKey(instance, value);
+                        }
+                    }
                 }
-            }
 
-            if (manyToMany.Count != 0)
-            {
-                foreach (var relation in manyToMany)
+                if (oneToMany.Count != 0)
                 {
-                    PropertyInfo property = relation._secondMember;
-                    MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
-                    var values = strGetter.Invoke(instance, null);
-                    IList valueList = values as IList;
-                    var secondInstance = valueList[0];
+                    foreach (var relation in oneToMany)
+                    {
+                        PropertyInfo property = relation._secondMember;
+                        MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
+                        var values = strGetter.Invoke(instance, null);
+                        IList valueList = values as IList;
 
-                    string memberTableName = _dataMapper.GetTableName(secondInstance.GetType());
-                    string mergedTablesName = GetMergedNames(tableName, memberTableName);
-                    int firstPrimaryKey = FindMinimumAvailableID(instance.GetType());
-                    int secondPrimaryKey = FindMinimumAvailableID(secondInstance.GetType());
+                        if (valueList.Count != 0)
+                        {
+                            CreateTable(valueList[0], tableName, "id");
+                        }
+                    }
+                }
 
-                    Dictionary<string, Tuple<string, Object>> tablesAndForeignKeys = new Dictionary<string, Tuple<string, Object>> {
-                        { tableName, new Tuple<string, Object>("id", firstPrimaryKey) },
-                        { memberTableName, new Tuple<string, Object> ("id", secondPrimaryKey) } };
+                if (manyToMany.Count != 0)
+                {
+                    foreach (var relation in manyToMany)
+                    {
+                        PropertyInfo property = relation._secondMember;
+                        MethodInfo strGetter = property.GetGetMethod(nonPublic: true);
+                        var values = strGetter.Invoke(instance, null);
+                        IList valueList = values as IList;
 
-                    CreateTable(secondInstance);
-                    CreateAssociationTable(mergedTablesName, tablesAndForeignKeys);
+                        if (valueList.Count != 0)
+                        {
+                            var secondInstance = valueList[0];
+                            string memberTableName = _dataMapper.GetTableName(secondInstance.GetType());
+                            string mergedTablesName = GetMergedNames(tableName, memberTableName);
+                            int firstPrimaryKey = FindMinimumAvailableID(instance.GetType());
+                            int secondPrimaryKey = FindMinimumAvailableID(secondInstance.GetType());
+
+                            Dictionary<string, Tuple<string, Object>> tablesAndForeignKeys = new Dictionary<string, Tuple<string, Object>> {
+                            { tableName, new Tuple<string, Object>("id", firstPrimaryKey) },
+                            { memberTableName, new Tuple<string, Object> ("id", secondPrimaryKey) } };
+
+                            CreateTable(secondInstance);
+                            CreateAssociationTable(mergedTablesName, tablesAndForeignKeys);
+                        }
+                    }
                 }
             }
         }
@@ -282,10 +319,29 @@ namespace Design_Patterns_project
             {
                 Type rootHierarchyType = _tableInheritance.GetMainType(type);
                 tableName = _dataMapper.GetTableName(rootHierarchyType);
+
+                if (!_msSqlConnection.CheckIfTableExists(tableName))
+                {
+                    Console.WriteLine("Handled exception");
+                    Console.WriteLine("This table is not present in database!");
+                    Console.WriteLine("If single table inheritance is used then the root hierarchy table is not present!\n");
+
+                    return null;
+                }
+            }
+
+            if (primaryKey < 0)
+            {
+                return null;
             }
 
             string selectQuery = _queryBuilder.CreateSelectQuery(tableName, listOfSqlCondition);
             SqlDataReader dataReader = _msSqlConnection.ExecuteObjectSelect(selectQuery);
+
+            if (!dataReader.HasRows)
+            {
+                return null;
+            }
 
             dataReader.Read();
 
@@ -303,7 +359,13 @@ namespace Design_Patterns_project
             {
                 PropertyInfo property = relationship._secondMember;
                 Type childType = property.PropertyType;
-                int foreignKey = GetForeignKeyFromTable(tableName, primaryKey);                    
+                string childTableName = _dataMapper.GetTableName(childType);
+                int foreignKey = -1;
+
+                if (_msSqlConnection.CheckIfTableExists(childTableName))
+                {
+                    foreignKey = GetForeignKeyFromTable(tableName, childTableName, primaryKey);
+                }                   
 
                 List<SqlCondition> condition = new List<SqlCondition> { SqlCondition.Equals("id", foreignKey) };
                 Object child = SelectWithOpenConnection(childType, condition, foreignKey);
@@ -343,6 +405,12 @@ namespace Design_Patterns_project
                 string childTableName = _dataMapper.GetTableName(childType);
 
                 string associationTable = GetMergedNames(tableName, childTableName);
+
+                if (!_msSqlConnection.CheckIfTableExists(associationTable))
+                {
+                    continue;
+                }
+
                 List<Object> childPrimaryKeys = SelectFromAssociationTable(associationTable, tableName + "_id", primaryKey);
                 List<Object> children = new List<object>();
 
@@ -367,7 +435,7 @@ namespace Design_Patterns_project
             return selectedObject;
         }
 
-        private int GetForeignKeyFromTable(string tableName, int primaryKey)
+        private int GetForeignKeyFromTable(string tableName, string childTableName, int primaryKey)
         {
             List<SqlCondition> foreignKeyConditions = new List<SqlCondition> { SqlCondition.Equals("id", primaryKey) };
             string foreignKeyQuery = _queryBuilder.CreateSelectQuery(tableName, foreignKeyConditions);
@@ -380,15 +448,26 @@ namespace Design_Patterns_project
             
             foreignKeyReader.Close();
 
-            return (int)columnsAndValues["id"];
+            if ((columnsAndValues[childTableName + "_id"]).GetType() == typeof(System.DBNull))
+            {
+                return -1;
+            }
+
+            return (int)columnsAndValues[childTableName + "_id"];
         }
 
         private List<int> GetForeignKeysFromTable(string childTableName, string parentTableName, int primaryKey)
         {
+            List<int> foreignKeys = new List<int>();
+
+            if (!_msSqlConnection.CheckIfTableExists(childTableName))
+            {
+                return foreignKeys;
+            }
+
             List<SqlCondition> foreignKeyConditions = new List<SqlCondition> { SqlCondition.Equals(parentTableName+"_id", primaryKey) };
             string foreignKeyQuery = _queryBuilder.CreateSelectQuery(childTableName, foreignKeyConditions);
             SqlDataReader foreignKeyReader = _msSqlConnection.ExecuteObjectSelect(foreignKeyQuery);
-            List<int> foreignKeys = new List<int>();
 
             while(foreignKeyReader.Read())
             {
@@ -530,16 +609,19 @@ namespace Design_Patterns_project
                         PropertyInfo propertyObj = relation._secondMember;
                         MethodInfo getter = propertyObj.GetGetMethod(nonPublic: true);
                         Object child = getter.Invoke(obj, null);
-                        int childPrimaryKey = FindMinimumAvailableID(child.GetType());
-                        string childTableName = _dataMapper.GetTableName(child.GetType());
+                        if (child != null)
+                        {
+                            int childPrimaryKey = FindMinimumAvailableID(child.GetType());
+                            string childTableName = _dataMapper.GetTableName(child.GetType());
 
-                        List<Tuple<string, object>> valuesToSet = new List<Tuple<string, object>> 
-                        {new Tuple<string,object>(childTableName + "_id", childPrimaryKey)};
+                            List<Tuple<string, object>> valuesToSet = new List<Tuple<string, object>>
+                            {new Tuple<string,object>(childTableName + "_id", childPrimaryKey)};
 
-                        List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.Equals("id", primaryKey) };
+                            List<SqlCondition> updateConditions = new List<SqlCondition> { SqlCondition.Equals("id", primaryKey) };
 
-                        Insert(child);
-                        Update(obj.GetType(), valuesToSet, updateConditions);
+                            Insert(child);
+                            Update(obj.GetType(), valuesToSet, updateConditions);
+                        }
                     }
                 }
 
@@ -607,18 +689,9 @@ namespace Design_Patterns_project
 
             if (_msSqlConnection.CheckIfTableExists(tableName))
             {
-                // concrete table inheritance
-                if ((_msSqlConnection.GetColumnNamesFromTable(tableName)).Count == (DataMapper.GetTypeAllProperties(obj.GetType())).Length)
-                {
-                    primaryKey = FindPrimaryKey(obj);
-                    DeletePrimaryKey(obj);
-                }
-                // class table inheritance or normal insert on single class
-                else
-                {
-                    primaryKey = FindPrimaryKey(obj);
-                    DeletePrimaryKey(obj);
-                }
+                // concrete table inheritance, class table inheritance or normal insert on single class
+                primaryKey = FindPrimaryKey(obj);
+                DeletePrimaryKey(obj);
             }
             // single table inheritance
             else
@@ -679,7 +752,7 @@ namespace Design_Patterns_project
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e.Message+"\n");
             }
         }
 

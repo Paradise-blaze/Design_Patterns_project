@@ -30,12 +30,17 @@ namespace SingleTableInheritanceTest
             MythicalCreature mythicalCreature3 = new MythicalCreature(40, "Orc");
             List<Object> creatures = new List<Object>() { iceDragon1, goldDragon1 };
 
+            //cases of incorrect usage of methods (before creating tables)
+            mythicalManager.Delete(dragon2);
+            mythicalManager.Update(goldDragon2);
+            mythicalManager.Insert(dragon1);
+            mythicalManager.Insert(dragon2);
+            mythicalManager.Inherit(creatures, -1);
+
             //create and inherit
             mythicalManager.Inherit(creatures, 0);
 
             //insert
-            mythicalManager.Insert(dragon1);
-            mythicalManager.Insert(dragon2);
             mythicalManager.Insert(iceDragon1);
             mythicalManager.Insert(iceDragon2);
             mythicalManager.Insert(iceDragon3);
@@ -57,6 +62,8 @@ namespace SingleTableInheritanceTest
 
             //delete
             mythicalManager.Delete(mythicalCreature1);
+            mythicalManager.Delete(mythicalCreature1);
+            mythicalManager.Delete(dragon1);
 
             //Test for relation-object mapping
             GoldDragon newDragon = (GoldDragon)mythicalManager.Select(typeof(GoldDragon), 7);
@@ -68,6 +75,13 @@ namespace SingleTableInheritanceTest
             Console.WriteLine("    endurance: {0}", newDragon.endurance);
             Console.WriteLine("    mineral hunger: {0}", newDragon.mineralHunger);
             Console.WriteLine("    preciousness: {0}", newDragon.preciousness);
+
+            MythicalCreature newCreature = (MythicalCreature)mythicalManager.Select(typeof(MythicalCreature), 100);
+
+            if (newCreature == null)
+            {
+                Console.WriteLine("\nThere is no object of that id in table\n");
+            }
 
             Console.WriteLine("Utter success");
         }

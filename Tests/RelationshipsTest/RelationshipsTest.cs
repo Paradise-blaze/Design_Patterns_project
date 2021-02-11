@@ -31,33 +31,35 @@ namespace RelationshipsTest
             testDog.AddFlea(flea2);
             testDog.AddFlea(flea3);
 
-            testDog.AddBowl(bowl);
+            testDog.SetBowl(bowl);
+            Dog dog = new Dog("Burek", 10);
 
             Label label1 = new Label(234);
-            Label label2 = new Label(235);
+            //Label label2 = new Label(235);
             Label label3 = new Label(236);
 
             Sheep sheep1 = new Sheep("Mary", 2.35);
-            sheep1.AddLabel(label1);
+            sheep1.SetLabel(label1);
 
             Sheep sheep2 = new Sheep("Pole", 1.84);
-            sheep2.AddLabel(label2);
+            //sheep2.SetLabel(label2);
 
             Sheep sheep3 = new Sheep("Ann", 1.27);
-            sheep3.AddLabel(label3);
+            sheep3.SetLabel(label3);
 
-            Alp alp1 = new Alp("Not so Silicon Valley", 5.61);
-            Alp alp2 = new Alp("Mountain Secret", 7.42);
+            //Alp alp1 = new Alp("Not so Silicon Valley", 5.61);
+            //Alp alp2 = new Alp("Mountain Secret", 7.42);
 
             Shepherd testShepherd = new Shepherd("Frank");
-            testShepherd.AddDog(testDog);
+            testShepherd.SetDog(testDog);
+            testShepherd.SetDog(dog);
 
             testShepherd.AddSheep(sheep1);
             testShepherd.AddSheep(sheep2);
             testShepherd.AddSheep(sheep3);
 
-            testShepherd.AddAlp(alp1);
-            testShepherd.AddAlp(alp2);
+            //testShepherd.AddAlp(alp1);
+            //testShepherd.AddAlp(alp2);
 
             //create
             mountainManager.CreateTable(testShepherd);
@@ -68,9 +70,11 @@ namespace RelationshipsTest
             sheep2.name = "Madeleine";
             mountainManager.Update(testShepherd);
             mountainManager.Update(sheep2);
+            mountainManager.Update(flea3);
 
             //delete
             mountainManager.Delete(flea3);
+            mountainManager.Delete(dog);
 
             //Test for relation-object mapping
             Shepherd newShepherd = (Shepherd)mountainManager.Select(typeof(Shepherd), 1);
@@ -81,22 +85,34 @@ namespace RelationshipsTest
 
         public static void IntroduceShepherd(Shepherd shepherd)
         {
+            if (shepherd == null)
+            {
+                return;
+            }
+
             Console.WriteLine("\nNew shepherd");
             Console.WriteLine("   name: {0}", shepherd.name);
             Console.WriteLine("   New dog");
             Console.WriteLine("      name: {0}", shepherd.dog.name);
             Console.WriteLine("      age: {0}", shepherd.dog.age);
-            Console.WriteLine("      New bowl");
-            Console.WriteLine("         mark: {0}", shepherd.dog.bowl.mark);
-            Console.WriteLine("         size: {0}", shepherd.dog.bowl.size);
 
-            Console.WriteLine("      New fleas");
-
-            foreach (Flea flea in shepherd.dog.fleas)
+            if (shepherd.dog.bowl != null)
             {
-                Console.WriteLine("      flea");
-                Console.WriteLine("         nick: {0}", flea.nick);
-                Console.WriteLine("         jump level: {0}", flea.jumpLevel);
+                Console.WriteLine("      New bowl");
+                Console.WriteLine("         mark: {0}", shepherd.dog.bowl.mark);
+                Console.WriteLine("         size: {0}", shepherd.dog.bowl.size);
+            }
+            
+            if (shepherd.dog.fleas != null)
+            {
+                Console.WriteLine("      New fleas");
+
+                foreach (Flea flea in shepherd.dog.fleas)
+                {
+                    Console.WriteLine("      flea");
+                    Console.WriteLine("         nick: {0}", flea.nick);
+                    Console.WriteLine("         jump level: {0}", flea.jumpLevel);
+                }
             }
 
             Console.WriteLine("   New sheep");
@@ -148,7 +164,7 @@ namespace RelationshipsTest
             this.name = name;
         }
 
-        public void AddDog(Dog dog)
+        public void SetDog(Dog dog)
         {
             this.dog = dog;
         }
@@ -184,7 +200,7 @@ namespace RelationshipsTest
             this.fleas.Add(flea);
         }
 
-        public void AddBowl(Bowl bowl)
+        public void SetBowl(Bowl bowl)
         {
             this.bowl = bowl;
         }
@@ -242,7 +258,7 @@ namespace RelationshipsTest
         [OneToOne]
         public Label label { get; set; }
 
-        public void AddLabel(Label label)
+        public void SetLabel(Label label)
         {
             this.label = label;
         }
