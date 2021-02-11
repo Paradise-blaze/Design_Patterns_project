@@ -33,12 +33,17 @@ namespace ConcreteTableInheritanceTest
             Vehicle bike2 = new Vehicle(48.91);
             List<Object> vehicles = new List<Object>() { car1, motorbike1 };
 
+            //cases of incorrect usage (before creating tables)
+            vehicleManager.Delete(truck4);
+            vehicleManager.Insert(car1);
+            vehicleManager.Insert(car2);
+            vehicleManager.Update(bike1);
+            vehicleManager.Inherit(vehicles, 10);
+
             //create and inherit
             vehicleManager.Inherit(vehicles, 2);
 
             //insert
-            vehicleManager.Insert(car1);
-            vehicleManager.Insert(car2);
             vehicleManager.Insert(car3);
             vehicleManager.Insert(motorbike1);
             vehicleManager.Insert(motorbike2);
@@ -54,11 +59,15 @@ namespace ConcreteTableInheritanceTest
             //update
             truck3.velocity = 109.25;
             car1.size = 8.92;
+            car3.velocity = 120.41;
             vehicleManager.Update(truck3);
             vehicleManager.Update(car1);
+            vehicleManager.Update(car3);
 
             //delete
             vehicleManager.Delete(truck5);
+            vehicleManager.Delete(truck5);
+            vehicleManager.Delete(car2);
 
             //Test for relation-object mapping
             FourWheeledVehicle newVehicle = (FourWheeledVehicle)vehicleManager.Select(typeof(FourWheeledVehicle), 1);
@@ -66,6 +75,13 @@ namespace ConcreteTableInheritanceTest
             Console.WriteLine("\nNew vehicle");
             Console.WriteLine("    velocity: {0}", newVehicle.velocity);
             Console.WriteLine("    size: {0}", newVehicle.size);
+
+            Vehicle vehicle = (Vehicle)vehicleManager.Select(typeof(Vehicle), 1);
+
+            if (vehicle == null)
+            {
+                Console.WriteLine("\nThere is no object of that id in table\n");
+            }
 
             Console.WriteLine("Utter success");
         }

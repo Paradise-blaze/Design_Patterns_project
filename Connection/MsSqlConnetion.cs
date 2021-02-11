@@ -185,8 +185,7 @@ namespace Design_Patterns_project.Connection
                         "Index #" + i + "\n" +
                         "Message: " + ex.Errors[i].Message + "\n" +
                         "LineNumber: " + ex.Errors[i].LineNumber + "\n" +
-                        "Source: " + ex.Errors[i].Source + "\n" +
-                        "Procedure: " + ex.Errors[i].Procedure + "\n");
+                        "Source: " + ex.Errors[i].Source + "\n");
                 }
                 return errorMessages.ToString();
         }
