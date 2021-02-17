@@ -26,13 +26,13 @@ namespace RelationshipsTest
             Bowl bowl = new Bowl("DogFood", 10);
 
             Dog testDog = new Dog("Barry", 6);
-            
+            Dog dog = new Dog("Burek", 10);
+
             testDog.AddFlea(flea1);
             testDog.AddFlea(flea2);
             testDog.AddFlea(flea3);
 
             testDog.SetBowl(bowl);
-            Dog dog = new Dog("Burek", 10);
 
             Label label1 = new Label(234);
             //Label label2 = new Label(235);
@@ -47,27 +47,33 @@ namespace RelationshipsTest
             Sheep sheep3 = new Sheep("Ann", 1.27);
             sheep3.SetLabel(label3);
 
-            //Alp alp1 = new Alp("Not so Silicon Valley", 5.61);
+            Alp alp1 = new Alp("Not so Silicon Valley", 5.61);
             //Alp alp2 = new Alp("Mountain Secret", 7.42);
 
             Shepherd testShepherd = new Shepherd("Frank");
+
             testShepherd.SetDog(testDog);
-            testShepherd.SetDog(dog);
 
             testShepherd.AddSheep(sheep1);
             testShepherd.AddSheep(sheep2);
             testShepherd.AddSheep(sheep3);
 
-            //testShepherd.AddAlp(alp1);
+            testShepherd.AddAlp(alp1);
             //testShepherd.AddAlp(alp2);
 
             //create
             mountainManager.CreateTable(testShepherd);
             mountainManager.Insert(testShepherd);
 
+            testShepherd.SetDog(dog);
+            mountainManager.Insert(dog);
+
+            mountainManager.Update(dog);
+
             //update
             testShepherd.name = "Johnny";
             sheep2.name = "Madeleine";
+            flea3.jumpLevel = 35.15;
             mountainManager.Update(testShepherd);
             mountainManager.Update(sheep2);
             mountainManager.Update(flea3);

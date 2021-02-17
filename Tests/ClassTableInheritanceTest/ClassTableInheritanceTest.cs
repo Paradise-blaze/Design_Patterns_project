@@ -47,6 +47,7 @@ namespace ClassTableInheritanceTest
             wizardManager.Insert(archMage3);
             wizardManager.Insert(archMage4);
             wizardManager.Insert(darkMage1);
+            wizardManager.Insert(mage1);
             wizardManager.Insert(mage2);
             wizardManager.Insert(character1);
             wizardManager.Insert(character2);
@@ -63,7 +64,7 @@ namespace ClassTableInheritanceTest
             //delete
             wizardManager.Delete(archMage2);
             wizardManager.Delete(archMage2);
-            wizardManager.Delete(mage1);
+            wizardManager.Delete(mage2);
 
             //select
             DarkMage newDarkMage = (DarkMage)wizardManager.Select(typeof(DarkMage), 1);
